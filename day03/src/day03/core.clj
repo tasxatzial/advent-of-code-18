@@ -31,6 +31,12 @@
              (max max-y (+ top height))])
           [0 0] claims))
 
+(defn claimed?
+  "Returns true if [x y] is a claimed coordinate."
+  [[x y] [left top width height :as claim]]
+  (and (<= left x (+ left width))
+       (<= top y (+ top height))))
+
 (defn -main
   []
   (println (max-coordinate)))

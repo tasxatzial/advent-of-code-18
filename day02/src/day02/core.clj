@@ -37,6 +37,36 @@
         count-exactly-3times (count-freq 3)]
     (* count-exactly-2times count-exactly-3times)))
 
+; --------------------------
+; problem 2
+
+(defn compare-ids
+  "Returns a list containing true and false, each item indicates
+  whether id1 and id2 are equal in the corresponding position."
+  [id1 id2]
+  (map = id1 id2))
+
+(defn find-single-difference
+  "If there is an item in all-ids which differs from id by exactly
+  one character, it returns a list of their positional differences
+  as returned by function compare-ids. That list should have exactly
+  one false item. Returns nil if such item does not exist."
+  [id all-ids]
+  (let [id-comparisons (map #(compare-ids id %) all-ids)]
+    (some #(and (= 1 (count (filter false? %))) %)
+          id-comparisons)))
+
+(defn find-single-difference-id
+  "Finds the id that differs by exactly one character from an
+  id in the box-ids and returns of vector of the id and the positional
+  difference list as returned by compare-ids."
+  []
+  (loop [[id & rest-ids] box-ids]
+    (if id
+      (if-let [res (find-single-difference id rest-ids)]
+        [id res]
+        (recur rest-ids)))))
+
 ; ---------------------------------------
 ; results
 
@@ -46,4 +76,5 @@
 
 (defn -main
   []
-  (println (day02-1)))
+  (println (day02-1))
+  (println (find-single-difference-id)))

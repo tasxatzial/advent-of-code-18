@@ -30,6 +30,20 @@
   [freq]
   (count (filter seq (map #(find-letters freq %) box-ids))))
 
+(defn calc-checksum
+  "Calculates the required checksum."
+  []
+  (let [count-exactly-2times (count-freq 2)
+        count-exactly-3times (count-freq 3)]
+    (* count-exactly-2times count-exactly-3times)))
+
+; ---------------------------------------
+; results
+
+(defn day02-1
+  []
+  (calc-checksum))
+
 (defn -main
   []
-  (println (count-freq 2)))
+  (println (day02-1)))

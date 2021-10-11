@@ -20,6 +20,17 @@
 
 (def claims (parse (slurp input-file)))
 
+; --------------------------
+; problem 1
+
+(defn max-coordinate
+  "Finds the max claimed coordinate."
+  []
+  (reduce (fn [[max-x max-y] [left top width height]]
+            [(max max-x (+ left width))
+             (max max-y (+ top height))])
+          [0 0] claims))
+
 (defn -main
   []
-  (println claims))
+  (println (max-coordinate)))

@@ -74,7 +74,15 @@
   []
   (calc-checksum))
 
+(defn day02-2
+  []
+  (let [[id diff] (find-single-difference-id)]
+    (->> (map vector id diff)
+         (filter #(true? (second %)))
+         (map first)
+         (apply str))))
+
 (defn -main
   []
   (println (day02-1))
-  (println (find-single-difference-id)))
+  (println (day02-2)))

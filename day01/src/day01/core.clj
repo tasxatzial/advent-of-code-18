@@ -15,6 +15,13 @@
 
 (def frequency-changes (parse (slurp input-file)))
 
+; ---------------------------------------
+; results
+
+(defn day01-1
+  []
+  (apply + frequency-changes))
+
 (defn -main
   []
-  (println frequency-changes))
+  (println (day01-1)))

@@ -13,6 +13,23 @@
 
 (def box-ids (parse (slurp input-file)))
 
+; --------------------------
+; problem 1
+
+(defn find-letters
+  "Finds the letters in the given box-id that appear exactly freq times."
+  [freq box-id]
+  (->> box-id
+       frequencies
+       (filter #(= freq (second %)))
+       (map first)))
+
+(defn count-freq
+  "Counts the box-ids in the collection that have a letter that
+  appears exactly freq times."
+  [freq]
+  (count (filter seq (map #(find-letters freq %) box-ids))))
+
 (defn -main
   []
-  (println box-ids))
+  (println (count-freq 2)))

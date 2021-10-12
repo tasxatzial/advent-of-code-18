@@ -114,6 +114,26 @@
                 most-asleep-result)))
           [0 0 []] sleep-periods-map))
 
+
+(defn contained?
+  "Returns true if minutes is in [start end], false otherwise."
+  [minute [start end]]
+  (<= start minute end))
+
+(defn find-most-asleep-minute
+  "Takes the data of the guard that sleeps the most and finds the minute
+  that the guard sleeps the most."
+  [most-asleep-guard]
+  (let [sleep-periods (last most-asleep-guard)]
+    (reduce (fn [most-asleep-minute minute]
+              (let [minute-contains (map #(contained? minute %) sleep-periods)
+                    minute-contain-count (count (filter true? minute-contains))
+                    max-contain-count (first most-asleep-minute)]
+                (if (> minute-contain-count max-contain-count)
+                  [minute-contain-count minute]
+                  most-asleep-minute)))
+            [0 0] (range 1 60))))
+
 (defn -main
   []
-  (println (find-most-asleep-guard (find-sleep-periods))))
+  (println (find-most-asleep-minute (find-most-asleep-guard (find-sleep-periods)))))

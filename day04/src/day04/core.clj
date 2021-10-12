@@ -39,6 +39,18 @@
         [date [new-hour new-minute] -1]
         [date [new-hour new-minute] -2]))))
 
+(defn parse
+  "Parses the input string and converts it to a vector of records.
+  preprocess-record and postprocess-record are applied in succession
+  to a string record. The final data structure has the records
+  sorted by date."
+  [s]
+  (->> s
+       (clojure.string/split-lines)
+       (map preprocess-record)
+       (sort-by #(clojure.string/join " " [(first %) (second %)]))
+       (mapv postprocess-record)))
+
 (defn -main
   []
-  (println (postprocess-record ["1518-10-05" "24:02" "Guard" "3347" "begins" "shift"])))
+  (println (parse (slurp input-file))))

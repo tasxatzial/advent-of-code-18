@@ -54,6 +54,45 @@
        (sort-by first)
        (mapv postprocess-record)))
 
+(def records (parse (slurp input-file)))
+
+; --------------------------
+; problem 1
+
+(defn extract-sleep-periods
+  "Takes a collection of records that indicate sleep/wake actions
+  and returns a vector containing sleep periods.
+  Example:
+  [[\"1518-03-27\" [24 11] -1] [\"1518-03-27\" [24 57] -2]
+  [\"1518-03-28\" [24 16] -1] [\"1518-03-28\" [24 33] -2]]
+  will return [[11 56] [16 32]] which means sleep between
+  11 and 56 minutes (inclusive) and sleep between
+  16 and 32 minutes."
+  [records]
+  (loop [[sleep-record awake-record & rest-records] records
+         result []]
+    (if sleep-record
+      (let [period [(second (second sleep-record))
+                    (dec (second (second awake-record)))]]
+        (recur rest-records (conj result period)))
+      result)))
+
+(defn find-sleep-periods
+  "Collects all sleep periods for every guard. Result is a map containing
+  keys (guard ids) and the corresponding collection of sleep periods as values."
+  []
+  (loop [[record & rest-records] records
+         guard-sleep-periods {}]
+    (if record
+      (let [sleep-awake-records (take-while #(or (= -1 (last %)) (= -2 (last %)))
+                                         rest-records)
+            remaining-records (drop (count sleep-awake-records) rest-records)
+            sleep-periods (extract-sleep-periods sleep-awake-records)
+            guard-id (last record)
+            new-sleep-periods (update guard-sleep-periods guard-id #(into % sleep-periods))]
+        (recur remaining-records new-sleep-periods))
+      guard-sleep-periods)))
+
 (defn -main
   []
-  (println (parse (slurp input-file))))
+  (println (find-sleep-periods)))

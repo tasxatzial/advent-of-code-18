@@ -1,5 +1,6 @@
 (ns day03.core
-  (:gen-class))
+  (:gen-class)
+  (:require [clojure.set :as set]))
 
 ; --------------------------
 ; common
@@ -44,6 +45,31 @@
   (and (<= left x (+ left width))
        (<= top y (+ top height))))
 
+(defn find-multiple-claimed
+  "Returns a vector of two set. The first set are the claimed coordinates which
+  are claimed at least twice. The second set are the claimed coordinates which
+  are claimed only one time."
+  []
+  (reduce (fn [[multiple-claimed not-claimed] claim]
+            (let [claimed (set (find-claimed claim))
+                  already-claimed (set/intersection multiple-claimed claimed)
+                  new-claimed (set/intersection not-claimed claimed)
+                  new-not-claimed (set/difference claimed already-claimed new-claimed)
+                  old-not-claimed (set/difference not-claimed already-claimed new-claimed)
+                  updated-multiple-claimed (into multiple-claimed new-claimed)
+                  updated-not-claimed (into old-not-claimed new-not-claimed)]
+              [updated-multiple-claimed updated-not-claimed]))
+          [#{} #{}] claims))
+
+(def memoized-find-multiple-claimed (memoize find-multiple-claimed))
+
+; --------------------------
+; results
+
+(defn day03-1
+  []
+  (count (first (memoized-find-multiple-claimed))))
+
 (defn -main
   []
-  (println (find-max-coordinate)))
+  (println (day03-1)))

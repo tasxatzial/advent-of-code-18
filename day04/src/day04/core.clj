@@ -93,6 +93,27 @@
         (recur remaining-records new-sleep-periods))
       guard-sleep-periods)))
 
+(defn find-total-sleep
+  "Takes a collection of sleep periods and returns the total sleep time in minutes."
+  [sleep-periods]
+  (reduce (fn [result [start end]]
+            (+ result (inc (- end start))))
+          0 sleep-periods))
+
+(defn find-most-asleep-guard
+  "Finds the guard that sleeps the most. Returns a vector that contains:
+  1) The guard id.
+  2) The total sleep time.
+  3) The sleep periods of this guard."
+  [sleep-periods-map]
+  (reduce (fn [most-asleep-result [guard-id sleep-periods]]
+            (let [guard-sleep-time (find-total-sleep sleep-periods)
+                  most-asleep-time (second most-asleep-result)]
+              (if (> guard-sleep-time most-asleep-time)
+                [guard-id guard-sleep-time sleep-periods]
+                most-asleep-result)))
+          [0 0 []] sleep-periods-map))
+
 (defn -main
   []
-  (println (find-sleep-periods)))
+  (println (find-most-asleep-guard (find-sleep-periods))))

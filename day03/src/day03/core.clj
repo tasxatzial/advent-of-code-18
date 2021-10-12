@@ -64,12 +64,32 @@
 (def memoized-find-multiple-claimed (memoize find-multiple-claimed))
 
 ; --------------------------
+; problem 2
+
+(defn find-non-overlapping-claim
+  "Find the claim id that does not overlap with any other claim."
+  []
+  (let [single-claimed (second (memoized-find-multiple-claimed))]
+    (loop [[claim & rest-claims] claims
+           index 0]
+      (if claim
+        (let [claimed (set (find-claimed claim))]
+          (if (empty? (set/difference claimed single-claimed))
+            (inc index)
+            (recur rest-claims (inc index))))))))
+
+; --------------------------
 ; results
 
 (defn day03-1
   []
   (count (first (memoized-find-multiple-claimed))))
 
+(defn day03-2
+  []
+  (find-non-overlapping-claim))
+
 (defn -main
   []
-  (println (day03-1)))
+  (println (day03-1))
+  (println (day03-2)))

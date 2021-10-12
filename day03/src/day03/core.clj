@@ -23,13 +23,20 @@
 ; --------------------------
 ; problem 1
 
-(defn max-coordinate
+(defn find-max-coordinate
   "Finds the max claimed coordinate."
   []
   (reduce (fn [[max-x max-y] [left top width height]]
             [(max max-x (+ left width))
              (max max-y (+ top height))])
           [0 0] claims))
+
+(defn find-claimed
+  "Returns a list of all claimed coordinates of a claim."
+  [[left top width height :as claim]]
+  (for [x (range left (+ left width))
+        y (range top (+ top height))]
+    [x y]))
 
 (defn claimed?
   "Returns true if [x y] is a claimed coordinate."
@@ -39,4 +46,4 @@
 
 (defn -main
   []
-  (println (max-coordinate)))
+  (println (find-max-coordinate)))

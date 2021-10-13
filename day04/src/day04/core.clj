@@ -38,6 +38,16 @@
 
 (def records (parse (slurp input-file)))
 
+(defn contained?
+  "Returns true if minutes is in [start end), false otherwise."
+  [minute [start end]]
+  (and (<= start minute) (< minute end)))
+
+(defn find-minute-frequency
+  "Finds in how many sleep periods the given minute appears in."
+  [minute sleep-periods]
+  (count (filter true? (map #(contained? minute %) sleep-periods))))
+
 ; --------------------------
 ; problem 1
 
@@ -59,8 +69,9 @@
       result)))
 
 (defn find-sleep-periods
-  "Collects all sleep periods for every guard. Result is a map containing
-  keys (guard ids) and the corresponding collection of sleep periods as values."
+  "Collects all sleep periods for every guard. Result is a map:
+  1) keys = guard id
+  2) value = sleep periods of the corresponding guard."
   []
   (loop [[record & rest-records] records
          guard-sleep-periods {}]
@@ -82,9 +93,8 @@
           0 sleep-periods))
 
 (defn find-most-asleep-guard
-  "Finds the guard that sleeps the most. Returns a vector that contains:
-  1) The guard id.
-  2) The total sleep time of the corresponding guard."
+  "Finds the guard that sleeps the most. Returns a vector that contains
+  the guard id and the total sleep time of the guard."
   [sleep-periods-map]
   (reduce (fn [most-asleep-result [guard-id guard-sleep-periods]]
             (let [guard-sleep-time (find-total-sleep guard-sleep-periods)
@@ -94,36 +104,34 @@
                 most-asleep-result)))
           [0 0] sleep-periods-map))
 
-
-(defn contained?
-  "Returns true if minutes is in [start end), false otherwise."
-  [minute [start end]]
-  (and (<= start minute) (< minute end)))
-
-(defn find-most-asleep-minute
-  "Takes the sleep periods of the guard that sleeps the most and finds the minute
-  that the guard sleeps the most."
+(defn find-most-sleep-minute
+  "Takes a collection of sleep periods and finds the most frequent minute.
+  Returns a vector that contains the frequency and the minute."
   [sleep-periods]
-  (reduce (fn [most-asleep-minute minute]
-            (let [minute-contains (map #(contained? minute %) sleep-periods)
-                  minute-contain-count (count (filter true? minute-contains))
-                  max-contain-count (first most-asleep-minute)]
-              (if (> minute-contain-count max-contain-count)
-                [minute-contain-count minute]
-                most-asleep-minute)))
+  (reduce (fn [most-sleep-minute minute]
+            (let [sleep-minute-frequency (find-minute-frequency minute sleep-periods)
+                  max-frequency (first most-sleep-minute)]
+              (if (> sleep-minute-frequency max-frequency)
+                [sleep-minute-frequency minute]
+                most-sleep-minute)))
           [0 0] (range 1 60)))
+
+(def memoized-find-sleep-periods (memoize find-sleep-periods))
+
+; --------------------------
+; problem 2
 
 ; --------------------------
 ; results
 
 (defn day04-1
   []
-  (let [sleep-periods (find-sleep-periods)
+  (let [sleep-periods (memoized-find-sleep-periods)
         most-asleep-guard (find-most-asleep-guard sleep-periods)
         guard-id (first most-asleep-guard)
-        most-asleep-guard-periods (get sleep-periods guard-id)
-        most-asleep-minute (find-most-asleep-minute most-asleep-guard-periods)]
-    (* guard-id (second most-asleep-minute))))
+        guard-sleep-periods (get sleep-periods guard-id)
+        guard-most-sleep-minute (find-most-sleep-minute guard-sleep-periods)]
+    (* guard-id (second guard-most-sleep-minute))))
 
 (defn -main
   []

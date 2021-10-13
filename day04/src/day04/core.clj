@@ -141,6 +141,16 @@
   (mapv #(vector (first %) (find-max-minute-frequency (second %)))
         sleep-periods-map))
 
+(defn find-guard-max-minute-frequency
+  "Takes the result of find-max-minute-frequencies and returns the subvector that
+  corresponds to the guard who is most frequently asleep on the same minute."
+  [max-minute-frequencies]
+  (reduce (fn [[_ [_ frequency-result] :as result] [_ [_ frequency] :as candidate]]
+            (if (> frequency frequency-result)
+              candidate
+              result))
+          [0 [0 0]] max-minute-frequencies))
+
 ; --------------------------
 ; results
 

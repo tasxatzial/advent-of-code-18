@@ -156,20 +156,18 @@
 
 (defn day04-1
   []
-  (let [sleep-periods (memoized-find-sleep-periods)
-        most-asleep-guard (find-most-asleep-guard sleep-periods)
+  (let [sleep-periods-map (memoized-find-sleep-periods)
+        most-asleep-guard (find-most-asleep-guard sleep-periods-map)
         guard-id (first most-asleep-guard)
-        guard-sleep-periods (get sleep-periods guard-id)
-        guard-most-sleep-minute (find-most-sleep-minute guard-sleep-periods)]
-    (* guard-id (second guard-most-sleep-minute))))
+        guard-sleep-periods (get sleep-periods-map guard-id)
+        [_ minute] (find-most-sleep-minute guard-sleep-periods)]
+    (* guard-id minute)))
 
 (defn day04-2
   []
-  (let [sleep-periods (memoized-find-sleep-periods)
-        max-minute-frequencies (find-max-minute-frequencies sleep-periods)
-        guard-max-minute-frequency (find-guard-max-minute-frequency max-minute-frequencies)
-        guard-id (first guard-max-minute-frequency)
-        minute (first (second guard-max-minute-frequency))]
+  (let [sleep-periods-map (memoized-find-sleep-periods)
+        max-minute-frequencies (find-max-minute-frequencies sleep-periods-map)
+        [guard-id [minute _]] (find-guard-max-minute-frequency max-minute-frequencies)]
     (* guard-id minute)))
 
 (defn -main

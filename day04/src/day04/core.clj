@@ -121,6 +121,17 @@
 ; --------------------------
 ; problem 2
 
+(defn find-max-minute-frequency
+  "Finds the minute that appears in most of the sleep periods.
+  Returns a vector containing the minute and its frequency."
+  [sleep-periods]
+  (reduce (fn [[_ frequency-result :as result] minute]
+            (let [minute-frequency (find-minute-frequency minute sleep-periods)]
+              (if (> minute-frequency frequency-result)
+                [minute minute-frequency]
+                result)))
+          [0 0] (range 1 60)))
+
 ; --------------------------
 ; results
 

@@ -132,6 +132,15 @@
                 result)))
           [0 0] (range 1 60)))
 
+(defn find-max-minute-frequencies
+  "For all guards it finds the minute that appears in most their sleep periods.
+  Returns a vector containing vectors that contain:
+  1) guard id
+  2) the result of applying find-max-minute-frequency to the guard sleep periods."
+  [sleep-periods-map]
+  (mapv #(vector (first %) (find-max-minute-frequency (second %)))
+        sleep-periods-map))
+
 ; --------------------------
 ; results
 

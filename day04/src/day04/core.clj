@@ -113,6 +113,18 @@
                 most-asleep-minute)))
           [0 0] (range 1 60)))
 
+; --------------------------
+; results
+
+(defn day04-1
+  []
+  (let [sleep-periods (find-sleep-periods)
+        most-asleep-guard (find-most-asleep-guard sleep-periods)
+        guard-id (first most-asleep-guard)
+        most-asleep-guard-periods (get sleep-periods guard-id)
+        most-asleep-minute (find-most-asleep-minute most-asleep-guard-periods)]
+    (* guard-id (second most-asleep-minute))))
+
 (defn -main
   []
-  (println 1))
+  (println (day04-1)))

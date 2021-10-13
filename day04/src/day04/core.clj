@@ -6,53 +6,35 @@
 
 (def input-file "resources\\input.txt")
 
-(defn preprocess-record
-  "Takes a record in string form, splits it into date & action parts
-  and replaces the 00 hour with 24.
-  Example:
-  \"[1518-10-05 00:02] Guard #3347 begins shift\"
-  becomes
-  [\"1518-10-05 24:02\" \" Guard #3347 begins shift\"]"
-  [s]
-  (let [split-record (clojure.string/split s #"[\[\]]")
-        record-data (filterv #(not= "" %) split-record)
-        date-time (first record-data)
-        new-date-time (clojure.string/replace date-time #"00:" "24:")]
-    (assoc record-data 0 new-date-time)))
-
-(defn postprocess-record
-  "Takes a record in the form returned by preprocess-record and
-  converts it to a vector that contains 3 items:
+(defn process-record
+  "Takes a string record and converts it to a vector that contains 3 items:
   1) The date string.
   2) The time as a vector of [hour minute].
   3) The final item is one of:
      -1 (guard falls asleep)
      -2 (guard awakes)
      positive number (guard id)"
-  [[date-time action]]
-  (let [[date time] (clojure.string/split date-time #" ")
-        [hour minute] (clojure.string/split time #":")
+  [s]
+  (let [split-record (clojure.string/split s #"[\[\]# ]")
+        date (second split-record)
+        [hour minute] (clojure.string/split (get split-record 2) #":")
         new-hour (Integer/parseInt hour)
-        new-minute (Integer/parseInt minute)
-        split-action (filterv #(not= "" %) (clojure.string/split action #"[# ]"))]
-    (if (= 4 (count split-action))
-      (let [guard-id (Integer/parseInt (second split-action))]
+        new-minute (Integer/parseInt minute)]
+    (if (= 9 (count split-record))
+      (let [guard-id (Integer/parseInt (get split-record 6))]
         [date [new-hour new-minute] guard-id])
-      (if (= "falls" (first split-action))
+      (if (= "falls" (get split-record 4))
         [date [new-hour new-minute] -1]
         [date [new-hour new-minute] -2]))))
 
 (defn parse
   "Parses the input string and converts it to a vector of records.
-  preprocess-record and postprocess-record are applied in succession
-  to a string record. The final data structure has the records
-  sorted by date,time."
+  The final data structure has the records sorted by date,time."
   [s]
   (->> s
        (clojure.string/split-lines)
-       (map preprocess-record)
-       (sort-by first)
-       (mapv postprocess-record)))
+       (sort)
+       (mapv process-record)))
 
 (def records (parse (slurp input-file)))
 
@@ -65,15 +47,14 @@
   Example:
   [[\"1518-03-27\" [24 11] -1] [\"1518-03-27\" [24 57] -2]
   [\"1518-03-28\" [24 16] -1] [\"1518-03-28\" [24 33] -2]]
-  will return [[11 56] [16 32]] which means sleep between
-  11 and 56 minutes (inclusive) and sleep between
-  16 and 32 minutes."
+  will return [[11 57] [16 33]] which means sleep between
+  11 and 57 minutes and sleep between 16 and 33 minutes."
   [records]
   (loop [[sleep-record awake-record & rest-records] records
          result []]
     (if sleep-record
       (let [period [(second (second sleep-record))
-                    (dec (second (second awake-record)))]]
+                    (second (second awake-record))]]
         (recur rest-records (conj result period)))
       result)))
 
@@ -97,43 +78,41 @@
   "Takes a collection of sleep periods and returns the total sleep time in minutes."
   [sleep-periods]
   (reduce (fn [result [start end]]
-            (+ result (inc (- end start))))
+            (+ result (- end start)))
           0 sleep-periods))
 
 (defn find-most-asleep-guard
   "Finds the guard that sleeps the most. Returns a vector that contains:
   1) The guard id.
-  2) The total sleep time.
-  3) The sleep periods of this guard."
+  2) The total sleep time of the corresponding guard."
   [sleep-periods-map]
-  (reduce (fn [most-asleep-result [guard-id sleep-periods]]
-            (let [guard-sleep-time (find-total-sleep sleep-periods)
+  (reduce (fn [most-asleep-result [guard-id guard-sleep-periods]]
+            (let [guard-sleep-time (find-total-sleep guard-sleep-periods)
                   most-asleep-time (second most-asleep-result)]
               (if (> guard-sleep-time most-asleep-time)
-                [guard-id guard-sleep-time sleep-periods]
+                [guard-id guard-sleep-time]
                 most-asleep-result)))
-          [0 0 []] sleep-periods-map))
+          [0 0] sleep-periods-map))
 
 
 (defn contained?
-  "Returns true if minutes is in [start end], false otherwise."
+  "Returns true if minutes is in [start end), false otherwise."
   [minute [start end]]
-  (<= start minute end))
+  (and (<= start minute) (< minute end)))
 
 (defn find-most-asleep-minute
-  "Takes the data of the guard that sleeps the most and finds the minute
+  "Takes the sleep periods of the guard that sleeps the most and finds the minute
   that the guard sleeps the most."
-  [most-asleep-guard]
-  (let [sleep-periods (last most-asleep-guard)]
-    (reduce (fn [most-asleep-minute minute]
-              (let [minute-contains (map #(contained? minute %) sleep-periods)
-                    minute-contain-count (count (filter true? minute-contains))
-                    max-contain-count (first most-asleep-minute)]
-                (if (> minute-contain-count max-contain-count)
-                  [minute-contain-count minute]
-                  most-asleep-minute)))
-            [0 0] (range 1 60))))
+  [sleep-periods]
+  (reduce (fn [most-asleep-minute minute]
+            (let [minute-contains (map #(contained? minute %) sleep-periods)
+                  minute-contain-count (count (filter true? minute-contains))
+                  max-contain-count (first most-asleep-minute)]
+              (if (> minute-contain-count max-contain-count)
+                [minute-contain-count minute]
+                most-asleep-minute)))
+          [0 0] (range 1 60)))
 
 (defn -main
   []
-  (println (find-most-asleep-minute (find-most-asleep-guard (find-sleep-periods)))))
+  (println 1))

@@ -40,12 +40,14 @@
   [unit]
   (remove #{unit (reverse-case unit)} polymer))
 
-(defn react-polymer-nounits
-  "For each unit from \\a to \\z it returns the polymer sequence after the
-  unit has been removed from the polymer and the polymer has fully reacted."
+(defn find-min-polymer-length
+  "For every unit, the unit (regardless of polarity) is removed form the polymer
+  and the polymer fully reacts. Returns the minimum polymer length."
   []
-  (let [units (map char (range (int \a) (inc (int \z))))]
-    (map #(react-polymer (remove-unit %)) units)))
+  (->> (map char (range (int \a) (inc (int \z))))
+       (map #(react-polymer (remove-unit %)))
+       (map count)
+       (apply min)))
 
 ; --------------------------
 ; results
@@ -56,7 +58,7 @@
 
 (defn day05-2
   []
-  (apply min (map count (react-polymer-nounits))) )
+  (find-min-polymer-length))
 
 (defn -main
   []

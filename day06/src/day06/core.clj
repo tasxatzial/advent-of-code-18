@@ -18,40 +18,6 @@
 
 (def coordinates (parse (slurp input-file)))
 
-(defn- find-edge
-  "Finds the {min,max} {x,y} coordinates.
-  fn-extreme must be 'min' or 'max'.
-  fn-coordinate must be 'first' (for the x coordinates) or 'second' (for the y coordinates)."
-  [fn-extreme fn-coordinate]
-  (->> coordinates
-       (mapv fn-coordinate)
-       (apply fn-extreme)))
-
-(defn find-max-x
-  "Finds the max x coordinate."
-  []
-  (find-edge max first))
-
-(defn find-min-x
-  "Finds the min x coordinate."
-  []
-  (find-edge min first))
-
-(defn find-max-y
-  "Finds the max y coordinate."
-  []
-  (find-edge max first))
-
-(defn find-min-y
-  "Finds the min y coordinate."
-  []
-  (find-edge min second))
-
-(def memoized-find-max-x (memoize find-max-x))
-(def memoized-find-min-x (memoize find-min-x))
-(def memoized-find-max-y (memoize find-max-y))
-(def memoized-find-min-y (memoize find-min-y))
-
 (defn manhattan-dist
   "Returns the manhattan distance of (x1,y2) and (x2,y2)."
   [[x1 y1] [x2 y2]]
@@ -61,23 +27,44 @@
 ; --------------------------
 ; problem 1
 
+(defn- find-edge
+  "Finds the {min,max} {x,y} coordinates.
+  fn-extreme must be 'min' or 'max'.
+  fn-coordinate must be 'first' (for the x coordinates) or 'second' (for the y coordinates)."
+  [fn-extreme fn-coordinate]
+  (->> coordinates
+       (mapv fn-coordinate)
+       (apply fn-extreme)))
+
+(defn create-edge-points
+  "Finds the min x, max x, min y, max y input coordinates and returns
+  them in a map. They can be accessed with :xmin, :xmax, :ymin, :ymax keywords."
+  []
+  {:xmin (find-edge min first)
+   :xmax (find-edge max first)
+   :ymin (find-edge min second)
+   :ymax (find-edge max second)})
+
+(def memoized-create-edge-points (memoize create-edge-points))
+
 (defn find-nearest-point
-  "Finds the nearest [x0 y0] coordinate to (x,y) using the manhattan distance
-  metric. Returns -1 if there are more than 1 nearest coordinates."
+  "Finds the nearest coordinate to (x,y) using the manhattan distance
+  metric. Returns either the coordinate vector or -1 if there are more
+  than 1 nearest coordinates."
   [[x y]]
   (let [distances (mapv #(manhattan-dist [x y] %) coordinates)
         min-distance (apply min distances)]
     (loop [[distance & rest-distances] distances
            index 0
-           belong-index -1]
+           nearest-coordinate-index -1]
       (if distance
         (if (= distance min-distance)
-          (if (> belong-index 0)
+          (if (>= nearest-coordinate-index 0)
             -1
             (recur rest-distances (inc index) index))
-          (recur rest-distances (inc index) belong-index))
-        (get coordinates belong-index)))))
+          (recur rest-distances (inc index) nearest-coordinate-index))
+        (get coordinates nearest-coordinate-index)))))
 
 (defn -main
   []
-  (println (memoized-find-min-y)))
+  (println (memoized-create-edge-points)))

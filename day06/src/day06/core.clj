@@ -52,6 +52,32 @@
 (def memoized-find-max-y (memoize find-max-y))
 (def memoized-find-min-y (memoize find-min-y))
 
+(defn manhattan-dist
+  "Returns the manhattan distance of (x1,y2) and (x2,y2)."
+  [[x1 y1] [x2 y2]]
+  (+ (Math/abs ^int (- x1 x2))
+     (Math/abs ^int (- y1 y2))))
+
+; --------------------------
+; problem 1
+
+(defn find-nearest-point
+  "Finds the nearest [x0 y0] coordinate to (x,y) using the manhattan distance
+  metric. Returns -1 if there are more than 1 nearest coordinates."
+  [[x y]]
+  (let [distances (mapv #(manhattan-dist [x y] %) coordinates)
+        min-distance (apply min distances)]
+    (loop [[distance & rest-distances] distances
+           index 0
+           belong-index -1]
+      (if distance
+        (if (= distance min-distance)
+          (if (> belong-index 0)
+            -1
+            (recur rest-distances (inc index) index))
+          (recur rest-distances (inc index) belong-index))
+        (get coordinates belong-index)))))
+
 (defn -main
   []
   (println (memoized-find-min-y)))

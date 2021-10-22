@@ -87,6 +87,37 @@
                 (update result nearest-point #(conj % coordinate)))))
           (zipmap coordinates (repeat [])) (create-scan-grid)))
 
+(defn area-bounded?
+  "Returns true iff the area coordinates create a bounded area.
+  This only happens when a coordinate does not belong to the edge points
+  of the rectangle with top-left coordinate (xmin, ymin) and bottom-right
+  coordinate (xmax, ymax)."
+  [area-points [xmin xmax ymin ymax]]
+  (every? #(and (not= xmin (first %))
+                (not= xmax (first %))
+                (not= ymin (second %))
+                (not= ymax (second %)))
+          area-points))
+
+(defn find-largest-area
+  "Finds the largest bounded area."
+  []
+  (let [{:keys [xmin xmax ymin ymax]} (memoized-create-edge-points)
+        edge-points [xmin xmax ymin ymax]]
+    (reduce (fn [result [_ area-points]]
+              (if (and (> (count area-points) result)
+                       (area-bounded? area-points edge-points))
+                (count area-points)
+                result))
+            0 (find-nearest-points))))
+
+; --------------------------
+; results
+
+(defn day05-1
+  []
+  (find-largest-area))
+
 (defn -main
   []
-  (println (find-nearest-points)))
+  (println (day05-1)))

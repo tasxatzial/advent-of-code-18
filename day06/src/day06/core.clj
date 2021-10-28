@@ -24,9 +24,6 @@
   (+ (Math/abs ^int (- x1 x2))
      (Math/abs ^int (- y1 y2))))
 
-; --------------------------
-; problem 1
-
 (defn- find-extreme-point
   "Finds the {min,max} {x,y} coordinates.
   fn-extreme must be 'min' or 'max'.
@@ -47,6 +44,20 @@
 
 (def memoized-create-edge-points (memoize find-extreme-points))
 
+(defn create-scan-grid
+  "Creates a vector of all coordinates which belong to a rectangle
+  area that includes all input coordinates."
+  []
+  (let [{:keys [xmin xmax ymin ymax]} (memoized-create-edge-points)]
+    (for [x (range xmin (inc xmax))
+          y (range ymin (inc ymax))]
+      [x y])))
+
+(def memoized-create-scan-grid (memoize create-scan-grid))
+
+; --------------------------
+; problem 1
+
 (defn find-nearest-point
   "Finds the nearest input coordinate to (x,y) using the manhattan distance
   metric. Returns either the coordinate vector or -1 if there are more
@@ -65,15 +76,6 @@
           (recur rest-distances (inc index) nearest-coordinate-index))
         (get coordinates nearest-coordinate-index)))))
 
-(defn create-scan-grid
-  "Creates a vector of all coordinates which belong to a rectangle
-  area that includes all input coordinates."
-  []
-  (let [{:keys [xmin xmax ymin ymax]} (memoized-create-edge-points)]
-    (for [x (range xmin (inc xmax))
-          y (range ymin (inc ymax))]
-      [x y])))
-
 (defn find-nearest-points
   "Find the nearest coordinates to each of the input coordinates.
   Returns a map. Each keys is an input coordinate and the corresponding
@@ -85,7 +87,7 @@
               (if (= nearest-point -1)
                 result
                 (update result nearest-point #(conj % coordinate)))))
-          (zipmap coordinates (repeat [])) (create-scan-grid)))
+          (zipmap coordinates (repeat [])) (memoized-create-scan-grid)))
 
 (defn area-bounded?
   "Returns true iff the area coordinates create a bounded area.
@@ -112,12 +114,31 @@
             0 (find-nearest-points))))
 
 ; --------------------------
+; problem 2
+
+(defn find-region-size
+  "Finds the size of the region containing all locations which have a total
+  distance to all given coordinates of less than 10000."
+  []
+  (reduce (fn [result point]
+            (let [point-distances (map #(manhattan-dist % point) coordinates)]
+              (if (< (apply + point-distances) 10000)
+                (inc result)
+                result)))
+          0 (memoized-create-scan-grid)))
+
+; --------------------------
 ; results
 
 (defn day05-1
   []
   (find-largest-area))
 
+(defn day05-2
+  []
+  (find-region-size))
+
 (defn -main
   []
-  (println (day05-1)))
+  (println (day05-1))
+  (println (day05-2)))

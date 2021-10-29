@@ -56,6 +56,12 @@
                 (conj result before-step)))
             #{} after-steps)))
 
+(defn candidate?
+  "Returns true if the given step can be added to the list of candidates, false otherwise."
+  [step curr-candidates before-steps-map]
+  (and (empty? (get before-steps-map step))
+       (not (contains? curr-candidates step))))
+
 (defn -main
   []
   (println (find-initial-candidates)))

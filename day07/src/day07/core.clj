@@ -62,6 +62,14 @@
   (and (empty? (get before-steps-map step))
        (not (contains? curr-candidates step))))
 
+(defn remove-step
+  "Traverses before-steps and for each item it updates its corresponding after-steps
+  by removing the step from the after-steps. Returns the updated before-steps-map."
+  [before-steps step before-steps-map]
+  (reduce (fn [result before-step]
+            (assoc result before-step (disj (get result before-step) step)))
+          before-steps-map before-steps))
+
 (defn -main
   []
   (println (find-initial-candidates)))

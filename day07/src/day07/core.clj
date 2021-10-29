@@ -70,6 +70,15 @@
             (assoc result before-step (disj (get result before-step) step)))
           before-steps-map before-steps))
 
+(defn add-candidates
+  "Adds all candidates from steps to the curr-candidates. Returns the updated curr-candidates."
+  [steps curr-candidates before-steps-map]
+  (reduce (fn [result step]
+            (if (candidate? step curr-candidates before-steps-map)
+              (conj result step)
+              result))
+          curr-candidates steps))
+
 (defn -main
   []
   (println (find-initial-candidates)))

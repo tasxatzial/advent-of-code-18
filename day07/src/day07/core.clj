@@ -17,6 +17,31 @@
 
 (def steps (parse (slurp input-file)))
 
+(defn create-after-steps-map
+  "Returns a map with key:step, value:vector of steps
+  that must be completed after step. The map contains each
+  uppercase letter from A to Z as a key."
+  []
+  (reduce (fn [result [before-step after-step]]
+            (if (contains? result before-step)
+              (update result before-step #(conj % after-step))
+              (assoc result before-step #{after-step})))
+          {} steps))
+
+(defn create-before-steps-map
+  "Returns a map with key:step, value:vector of steps
+  that must be completed before step. The map contains each
+  uppercase letter from A to Z as a key."
+  []
+  (reduce (fn [result [before-step after-step]]
+            (if (contains? result after-step)
+              (update result after-step #(conj % before-step))
+              (assoc result after-step #{before-step})))
+          {} steps))
+
+(def memoized-create-after-steps (memoize create-after-steps-map))
+(def memoized-create-before-steps (memoize create-before-steps-map))
+
 (defn -main
   []
-  (println steps))
+  (println (memoized-create-before-steps)))

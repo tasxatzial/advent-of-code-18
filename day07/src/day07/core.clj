@@ -42,6 +42,20 @@
 (def memoized-create-after-steps (memoize create-after-steps-map))
 (def memoized-create-before-steps (memoize create-before-steps-map))
 
+; --------------------------
+; problem 1
+
+(defn find-initial-candidates
+  "Returns a set of the steps that can be completed in the first iteration."
+  []
+  (let [after-steps (memoized-create-after-steps)
+        before-steps (memoized-create-before-steps)]
+    (reduce (fn [result [before-step _]]
+              (if (get before-steps before-step)
+                result
+                (conj result before-step)))
+            #{} after-steps)))
+
 (defn -main
   []
-  (println (memoized-create-before-steps)))
+  (println (find-initial-candidates)))

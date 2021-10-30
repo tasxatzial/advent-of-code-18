@@ -42,9 +42,6 @@
 (def memoized-create-after-steps-map (memoize create-after-steps-map))
 (def memoized-create-before-steps-map (memoize create-before-steps-map))
 
-; --------------------------
-; problem 1
-
 (defn find-initial-candidates
   "Returns a set of the steps that can be completed in the first iteration."
   []
@@ -54,7 +51,10 @@
               (if (get before-steps before-step)
                 result
                 (conj result before-step)))
-            #{} after-steps)))
+            (sorted-set) after-steps)))
+
+; --------------------------
+; problem 1
 
 (defn candidate?
   "Returns true if the given step can be added to the list of candidates, false otherwise."
@@ -63,12 +63,14 @@
        (not (contains? curr-candidates step))))
 
 (defn remove-step
-  "Traverses before-steps and for each item it updates its corresponding after-steps
-  by removing the step from the after-steps. Returns the updated before-steps-map."
-  [before-steps step before-steps-map]
-  (reduce (fn [result before-step]
-            (assoc result before-step (disj (get result before-step) step)))
-          before-steps-map before-steps))
+  "Traverses after-steps and for each item it updates its corresponding before-steps
+  by removing the step from the before-steps. Returns the updated before-steps-map."
+  [after-steps step before-steps-map]
+  (reduce (fn [result after-step]
+            (let [before-steps (get result after-step)
+                  new-before-steps (disj before-steps step)]
+              (assoc result after-step new-before-steps)))
+          before-steps-map after-steps))
 
 (defn add-candidates
   "Adds all candidates from steps to the curr-candidates. Returns the updated curr-candidates."

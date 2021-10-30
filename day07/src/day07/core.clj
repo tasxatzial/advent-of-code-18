@@ -134,6 +134,12 @@
               result))
           before-steps-map workers))
 
+(defn assign-worker
+  "Assigns a new-step to a worker."
+  [[worker-id _] new-step]
+  (let [time-taken (+ 60 (- (int new-step) 64))]
+    (vector worker-id [new-step time-taken])))
+
 ; --------------------------
 ; results
 

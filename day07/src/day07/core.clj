@@ -123,6 +123,17 @@
               result))
           candidates workers))
 
+(defn update-before-steps-map
+  "Remove from the values of the before-steps map the just finished steps."
+  [workers before-steps-map after-steps-map]
+  (reduce (fn [result worker]
+            (if (finished-worker? worker)
+              (let [finished-step (first (second worker))
+                    after-steps (get after-steps-map finished-step)]
+                (remove-step after-steps finished-step result))
+              result))
+          before-steps-map workers))
+
 ; --------------------------
 ; results
 

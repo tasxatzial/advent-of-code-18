@@ -180,6 +180,27 @@
   (let [idle-workers (filterv idle-worker? workers)]
     (map assign-worker idle-workers accepted-candidates)))
 
+(defn compute-total-time
+  "Computes the total time required to complete all steps."
+  []
+  (let [after-steps-map (memoized-create-after-steps-map)
+        before-steps-map (memoized-create-before-steps-map)
+        initial-candidates (find-initial-candidates)]
+    (loop [time 0
+           workers (into (sorted-map) (zipmap (range 1 6) (repeat \space)))
+           candidates initial-candidates
+           before-steps-map before-steps-map]
+      (let [updated-workers (into (sorted-map) (advance-workers workers))
+            new-before-steps-map (update-before-steps-map updated-workers before-steps-map after-steps-map)
+            tmp-candidates (add-candidates2 updated-workers candidates after-steps-map)
+            accepted-candidates (update-candidates tmp-candidates new-before-steps-map)
+            assigned-workers (assign-workers accepted-candidates updated-workers)
+            new-candidates (delete-assigned-candidates assigned-workers tmp-candidates)
+            new-workers (into updated-workers assigned-workers)]
+        (if (all-done new-workers new-candidates)
+          time
+          (recur (inc time) new-workers new-candidates new-before-steps-map))))))
+
 ; --------------------------
 ; results
 
@@ -187,6 +208,11 @@
   []
   (compute-sequence))
 
+(defn day07-2
+  []
+  (compute-total-time))
+
 (defn -main
   []
-  (println (day07-1)))
+  (println (day07-1))
+  (println (day07-2)))

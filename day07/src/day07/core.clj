@@ -113,6 +113,16 @@
   [worker]
   (and (not= \space (second worker)) (= 0 (second (second worker)))))
 
+(defn add-candidates2
+  "Adds all after-steps of the just finished steps to the current candidates."
+  [workers candidates after-steps-map]
+  (reduce (fn [result worker]
+            (if (finished-worker? worker)
+              (let [finished-step (first (second worker))]
+                (into result (get after-steps-map finished-step)))
+              result))
+          candidates workers))
+
 ; --------------------------
 ; results
 

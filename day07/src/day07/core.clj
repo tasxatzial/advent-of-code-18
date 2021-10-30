@@ -154,13 +154,20 @@
           (sorted-map) workers))
 
 (defn update-candidates
-  "Returns a vector of the steps that can be assigned to a worker."
+  "Returns a vector of the steps that can be assigned to a worker at the current
+  time iteration."
   [candidates before-steps-map]
   (reduce (fn [result candidate]
             (if (empty? (get before-steps-map candidate))
               (conj result candidate)
               result))
           [] candidates))
+
+(defn delete-assigned-candidates
+  "Deletes the candidate steps that have been assigned from the list of candidate steps."
+  [assigned-workers candidates]
+  (let [worker-steps (set (map #(first (second %)) assigned-workers))]
+    (reduce disj candidates worker-steps)))
 
 ; --------------------------
 ; results

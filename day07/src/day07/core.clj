@@ -101,6 +101,19 @@
         (apply str result)))))
 
 ; --------------------------
+; problem 2
+
+(defn idle-worker?
+  "Returns true if a worker is idle, false otherwise."
+  [worker]
+  (or (= \space (second worker)) (= 0 (second (second worker)))))
+
+(defn finished-worker?
+  "Returns true if a worker has just finished a step."
+  [worker]
+  (and (not= \space (second worker)) (= 0 (second (second worker)))))
+
+; --------------------------
 ; results
 
 (defn day07-1

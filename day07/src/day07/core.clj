@@ -124,7 +124,8 @@
           candidates workers))
 
 (defn update-before-steps-map
-  "Remove from the values of the before-steps map the just finished steps."
+  "Remove from the values of the before-steps map the steps that have been
+  completed in the current iteration."
   [workers before-steps-map after-steps-map]
   (reduce (fn [result worker]
             (if (finished-worker? worker)
@@ -153,8 +154,8 @@
                   (conj result (vector worker-id [step (dec time)]))))))
           (sorted-map) workers))
 
-(defn update-candidates
-  "Returns a vector of the steps that can be assigned to a worker at the current
+(defn find-assignable-candidates
+  "Returns a vector of the candidate steps that can be assigned to a worker at the current
   time iteration."
   [candidates before-steps-map]
   (reduce (fn [result candidate]
@@ -164,7 +165,8 @@
           [] candidates))
 
 (defn delete-assigned-candidates
-  "Deletes the candidate steps that have been assigned from the list of candidate steps."
+  "Deletes the candidate steps that have been assigned at the current time step
+  from the list of candidate steps."
   [assigned-workers candidates]
   (let [worker-steps (set (map #(first (second %)) assigned-workers))]
     (reduce disj candidates worker-steps)))
@@ -175,7 +177,7 @@
   (and (every? idle-worker? workers) (empty? candidates)))
 
 (defn assign-workers
-  "Assign a new step to all idle workers."
+  "Assign the accepted candidate steps to the idle workers."
   [accepted-candidates workers]
   (let [idle-workers (filterv idle-worker? workers)]
     (map assign-worker idle-workers accepted-candidates)))
@@ -190,10 +192,10 @@
            workers (into (sorted-map) (zipmap (range 1 6) (repeat \space)))
            candidates initial-candidates
            before-steps-map before-steps-map]
-      (let [updated-workers (into (sorted-map) (advance-workers workers))
+      (let [updated-workers (advance-workers workers)
             new-before-steps-map (update-before-steps-map updated-workers before-steps-map after-steps-map)
             tmp-candidates (add-candidates2 updated-workers candidates after-steps-map)
-            accepted-candidates (update-candidates tmp-candidates new-before-steps-map)
+            accepted-candidates (find-assignable-candidates tmp-candidates new-before-steps-map)
             assigned-workers (assign-workers accepted-candidates updated-workers)
             new-candidates (delete-assigned-candidates assigned-workers tmp-candidates)
             new-workers (into updated-workers assigned-workers)]

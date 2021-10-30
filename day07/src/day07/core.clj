@@ -140,6 +140,19 @@
   (let [time-taken (+ 60 (- (int new-step) 64))]
     (vector worker-id [new-step time-taken])))
 
+(defn advance-workers
+  "Find the next state of the workers."
+  [workers]
+  (reduce (fn [result [worker-id worker-status :as worker]]
+            (if (= \space worker-status)
+              (conj result worker)
+              (let [step (first worker-status)
+                    time (second worker-status)]
+                (if (= 0 time)
+                  (conj result (vector worker-id \space))
+                  (conj result (vector worker-id [step (dec time)]))))))
+          (sorted-map) workers))
+
 ; --------------------------
 ; results
 

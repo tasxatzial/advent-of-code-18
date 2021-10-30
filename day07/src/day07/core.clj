@@ -174,6 +174,12 @@
   [workers candidates]
   (and (every? idle-worker? workers) (empty? candidates)))
 
+(defn assign-workers
+  "Assign a new step to all idle workers."
+  [accepted-candidates workers]
+  (let [idle-workers (filterv idle-worker? workers)]
+    (map assign-worker idle-workers accepted-candidates)))
+
 ; --------------------------
 ; results
 

@@ -153,6 +153,15 @@
                   (conj result (vector worker-id [step (dec time)]))))))
           (sorted-map) workers))
 
+(defn update-candidates
+  "Returns a vector of the steps that can be assigned to a worker."
+  [candidates before-steps-map]
+  (reduce (fn [result candidate]
+            (if (empty? (get before-steps-map candidate))
+              (conj result candidate)
+              result))
+          [] candidates))
+
 ; --------------------------
 ; results
 

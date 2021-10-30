@@ -169,6 +169,11 @@
   (let [worker-steps (set (map #(first (second %)) assigned-workers))]
     (reduce disj candidates worker-steps)))
 
+(defn all-done
+  "Returns true if no more time iterations can be done, false otherwise."
+  [workers candidates]
+  (and (every? idle-worker? workers) (empty? candidates)))
+
 ; --------------------------
 ; results
 

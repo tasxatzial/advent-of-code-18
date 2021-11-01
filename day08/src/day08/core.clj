@@ -53,6 +53,28 @@
          (let [[new-sum new-index] (construct-tree (+ i 2))]
            (recur (conj sum new-sum) new-index (dec child-count))))))))
 
+(defn root-value
+  "Computes the value of the root node of the tree."
+  ([]
+   (let [tree-struct (first (construct-tree))]
+     (root-value tree-struct)))
+  ([node]
+   (if (vector? node)
+     (let [[child-count meta-count] (first node)]
+       (if (zero? child-count)
+         (apply + (subvec node 1))
+         (let [meta (subvec node (- (count node) meta-count))]
+           (loop [[first-meta & rest-meta] (group-by identity meta)
+                  sum 0]
+             (if first-meta
+               (let [first-meta-count (count (second first-meta))
+                     first-meta-val (first first-meta)
+                     child-val (root-value (get node first-meta-val))
+                     new-sum (+ sum (* first-meta-count child-val))]
+                 (recur rest-meta new-sum))
+               sum)))))
+     0)))
+
 ; --------------------------
 ; results
 
@@ -60,7 +82,11 @@
   []
   (first (metadata-sum)))
 
+(defn day08-2
+  []
+  (root-value))
+
 (defn -main
   []
   (println (day08-1))
-  (println (construct-tree)))
+  (println (day08-2)))

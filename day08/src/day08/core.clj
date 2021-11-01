@@ -15,6 +15,24 @@
 
 (def tree (parse (slurp input-file)))
 
+(defn construct-tree
+  "Returns a vector that explicitly indicates the tree structure.
+  The vector has two items, the first one is the tree."
+  ([]
+   (construct-tree 0))
+  ([header-index]
+   (let [child-count (get tree header-index)]
+     (loop [sum (conj [] [child-count (get tree (inc header-index))])
+            i header-index
+            child-count child-count]
+       (if (zero? child-count)
+         (let [meta-count (get tree (inc header-index))]
+           [(into sum (subvec tree (+ i 2) (+ (+ i 2) meta-count))) (+ i meta-count)])
+         (let [[new-sum new-index] (construct-tree (+ i 2))]
+           (recur (conj sum new-sum) new-index (dec child-count))))))))
+
+(def memoized-construct-tree (memoize construct-tree))
+
 ; --------------------------
 ; problem 1
 
@@ -34,29 +52,29 @@
          (let [[new-sum new-index] (metadata-sum (+ i 2))]
            (recur (+ sum new-sum) new-index (dec child-count))))))))
 
+(defn metadata-sum2
+  "Computes the sum of all metadata."
+  ([]
+   (let [tree-struct (first (memoized-construct-tree))]
+     (metadata-sum2 tree-struct)))
+  ([node]
+   (let [[child-count meta-count] (first node)
+         meta-sum (apply + (subvec node (- (count node) meta-count)))]
+     (if (zero? child-count)
+       meta-sum
+       (loop [i 1
+              sum meta-sum]
+         (if (= i (inc child-count))
+           sum
+           (let [child-meta-sum (metadata-sum2 (get node i))]
+             (recur (inc i) (+ sum child-meta-sum)))))))))
 ; --------------------------
 ; problem 2
-
-(defn construct-tree
-  "Returns a vector that explicitly indicates the tree structure.
-  The vector has two items, the first one is the tree."
-  ([]
-   (construct-tree 0))
-  ([header-index]
-   (let [child-count (get tree header-index)]
-     (loop [sum (conj [] [child-count (get tree (inc header-index))])
-            i header-index
-            child-count child-count]
-       (if (zero? child-count)
-         (let [meta-count (get tree (inc header-index))]
-           [(into sum (subvec tree (+ i 2) (+ (+ i 2) meta-count))) (+ i meta-count)])
-         (let [[new-sum new-index] (construct-tree (+ i 2))]
-           (recur (conj sum new-sum) new-index (dec child-count))))))))
 
 (defn root-value
   "Computes the value of the root node of the tree."
   ([]
-   (let [tree-struct (first (construct-tree))]
+   (let [tree-struct (first (memoized-construct-tree))]
      (root-value tree-struct)))
   ([node]
    (if (vector? node)
@@ -78,9 +96,13 @@
 ; --------------------------
 ; results
 
-(defn day08-1
+(defn day08-1a
   []
   (first (metadata-sum)))
+
+(defn day08-1b
+  []
+  (first (metadata-sum2)))
 
 (defn day08-2
   []
@@ -88,5 +110,6 @@
 
 (defn -main
   []
-  (println (day08-1))
+  (println (day08-1a))
+  (println (day08-1b))
   (println (day08-2)))

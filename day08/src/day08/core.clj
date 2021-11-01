@@ -35,12 +35,32 @@
            (recur (+ sum new-sum) new-index (dec child-count))))))))
 
 ; --------------------------
+; problem 2
+
+(defn construct-tree
+  "Returns a vector that explicitly indicates the tree structure.
+  The vector has two items, the first one is the tree."
+  ([]
+   (construct-tree 0))
+  ([header-index]
+   (let [child-count (get tree header-index)]
+     (loop [sum (conj [] [child-count (get tree (inc header-index))])
+            i header-index
+            child-count child-count]
+       (if (zero? child-count)
+         (let [meta-count (get tree (inc header-index))]
+           [(into sum (subvec tree (+ i 2) (+ (+ i 2) meta-count))) (+ i meta-count)])
+         (let [[new-sum new-index] (construct-tree (+ i 2))]
+           (recur (conj sum new-sum) new-index (dec child-count))))))))
+
+; --------------------------
 ; results
 
 (defn day08-1
   []
-  (metadata-sum))
+  (first (metadata-sum)))
 
 (defn -main
   []
-  (println (day08-1)))
+  (println (day08-1))
+  (println (construct-tree)))

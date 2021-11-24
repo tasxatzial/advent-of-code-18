@@ -5,6 +5,20 @@
 (def last-marble 71019)
 
 ; --------------------------
+; common
+
+(defn vec-remove
+  "Removes the element in position pos of a vector coll."
+  [pos coll]
+  (into (subvec coll 0 pos) (subvec coll (inc pos))))
+
+(defn vec-add
+  "Adds the element in position pos of a vector coll.
+  If pos == (count coll) the element is added to the end of the vector."
+  [pos coll elem]
+  (into (conj (subvec coll 0 pos) elem) (subvec coll pos)))
+
+; --------------------------
 ; problem 1
 
 (defn make-move

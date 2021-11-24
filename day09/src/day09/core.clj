@@ -21,6 +21,30 @@
 ; --------------------------
 ; problem 1
 
+(defn find-add-pos
+  "Returns the position of the marble that will be added next when the
+  previous marble was added in position pos."
+  [pos marble-count]
+  (if (<= (+ pos 2) marble-count)
+    (+ pos 2)
+    (- (+ pos 2) marble-count)))
+
+(defn find-remove-pos
+  "Returns the position of the marble that will be removed when the
+  previous marble was removed from position pos."
+  [pos marble-count]
+  (if (>= (- pos 7) 0)
+    (- pos 7)
+    (+ marble-count (- pos 7))))
+
+(defn find-pos-after-removed-marble
+  "Finds the position of the current marble after a marble has been
+  removed from position pos."
+  [total-marbles pos]
+  (if (= (dec total-marbles) pos)
+    0
+    pos))
+
 (defn make-move
   "Makes one move in the game and returns the update map of scores."
   [pos marble scores positions player]

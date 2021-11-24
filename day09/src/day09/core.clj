@@ -45,6 +45,34 @@
     0
     pos))
 
+(defn add-marble
+  "Inserts a marble in the positions vector at position pos and returns a vector
+  with 3 elements:
+  1) The updated player scores.
+  2) The position of the next current marble.
+  3) The updated vector of marbles."
+  [pos marble scores positions]
+  (let [add-pos (find-add-pos pos (count positions))
+        new-positions (vec-add add-pos positions marble)]
+    [scores add-pos new-positions]))
+
+(defn remove-marble
+  "Removes a marble from position pos of the positions vector and returns a vector
+  with 3 elements:
+  1) The updated player scores.
+  2) The position of the next current marble.
+  3) The updated vector of marbles."
+  [pos marble scores positions player]
+  (let [total-marbles (count positions)
+        removed-pos (find-remove-pos pos total-marbles)
+        new-pos (find-pos-after-removed-marble total-marbles removed-pos)
+        removed-marble (get positions removed-pos)
+        new-positions (vec-remove removed-pos positions)
+        player-score (get scores player 0)
+        new-player-score (+ player-score removed-marble marble)
+        new-scores (assoc scores player new-player-score)]
+    [new-scores new-pos new-positions]))
+
 (defn make-move
   "Makes one move in the game and returns the update map of scores."
   [pos marble scores positions player]
@@ -69,10 +97,6 @@
 
 ; --------------------------
 ; results
-
-(defn day09-1a
-  []
-  (apply max (map second (calc-scores))))
 
 (defn -main
   []

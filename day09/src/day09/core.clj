@@ -7,6 +7,13 @@
 ; --------------------------
 ; problem 1
 
+(defn make-move
+  "Makes one move in the game and returns the update map of scores."
+  [pos marble scores positions player]
+  (if (zero? (mod marble 23))
+    (remove-marble pos marble scores positions player)
+    (add-marble pos marble scores positions)))
+
 (defn calc-scores
   "Calculate a map of player scores. Keys run from 0 to (players -1)."
   []

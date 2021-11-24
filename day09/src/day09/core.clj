@@ -98,6 +98,10 @@
 ; --------------------------
 ; results
 
+(defn day09-1a
+  []
+  (apply max (map second (calc-scores))))
+
 (defn -main
   []
-  (println (calc-scores)))
+  (println (day09-1a)))

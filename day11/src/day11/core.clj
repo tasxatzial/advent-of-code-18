@@ -22,6 +22,12 @@
 
 (def subgrid-offsets [0 1 2 300 301 302 600 601 602])
 
+(defn find-subgrid-power
+  "Finds the total power of a 3x3 subgrid."
+  [cells-power topleft-index]
+  (let [subgrid-powers (map #(get cells-power (+ topleft-index %)) subgrid-offsets)]
+    (apply + subgrid-powers)))
+
 (defn -main
   []
   (println (find-cell-power [3 5])))

@@ -12,6 +12,16 @@
       (- (int (/ power 100)) (* 10 (int (/ power 1000))) 5)
       -5)))
 
+(defn create-grid
+  "Creates a vector that contains all [x y] coordinates
+   with 1<=x<=max, 1<=y<=max"
+  [max]
+  (vec (for [x (range 1 (inc max))
+             y (range 1 (inc max))]
+         [y x])) )
+
+(def subgrid-offsets [0 1 2 300 301 302 600 601 602])
+
 (defn -main
   []
   (println (find-cell-power [3 5])))

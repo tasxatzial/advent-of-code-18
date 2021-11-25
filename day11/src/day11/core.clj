@@ -28,6 +28,28 @@
   (let [subgrid-powers (map #(get cells-power (+ topleft-index %)) subgrid-offsets)]
     (apply + subgrid-powers)))
 
+(defn find-max-power
+  "Finds the 3x3 grid that has the most power. Returns a vector
+  containing the power and the top-left [x y] coordinates of the grid."
+  []
+  (let [cells-power (mapv find-cell-power (create-grid 300))
+        scan-grid (create-grid 298)]
+    (reduce (fn [result [x y :as cell]]
+              (let [subgrid-index (+ (dec x) (* (dec y) 300))
+                    subgrid-power (find-subgrid-power cells-power subgrid-index)
+                    max-power (first result)]
+                (if (> subgrid-power max-power)
+                  [subgrid-power cell]
+                  result)))
+            [0 0] scan-grid)))
+
+; --------------------------
+; results
+
+(defn day11-1
+  []
+  (second (find-max-power)))
+
 (defn -main
   []
-  (println (find-cell-power [3 5])))
+  (println (day11-1)))

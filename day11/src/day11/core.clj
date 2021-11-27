@@ -28,7 +28,7 @@
   The offsets indicate positions in the 300x300 grid."
   [subgrid-size]
   (let [x-offsets (range subgrid-size)
-        y-offsets (range 0 (* 300 subgrid-size) 300)]
+        y-offsets (range 0 (* max-subgrid-size subgrid-size) max-subgrid-size)]
     (reduce (fn [result offset]
               (into result (map #(+ offset %) x-offsets)))
             [] y-offsets)))
@@ -42,7 +42,7 @@
 
 (defn find-max-power
   "Finds the subgrid of the given size that has the most power. Returns a vector
-  containing the power and the top-left [x y] coordinate of the subgrid."
+  containing the power and the top-left [x y] corner of the subgrid."
   [subgrid-size]
   (let [cells-power (mapv find-cell-power (create-grid 300))
         scan-grid (create-grid (- 300 (dec subgrid-size)))]
@@ -80,7 +80,7 @@
 
 (defn create-summed-table
   "Returns the summed-area table of the vector that contains the
-  power of each [x y] location. The table is stored as a vector
+  power of each cell at [x y]. The table is stored as a vector
   of vectors, each vector corresponds to a grid row."
   [cell-powers]
   (let [by-row-partition (partition max-subgrid-size cell-powers)
@@ -96,7 +96,7 @@
 
 (defn get-top-left-sum
   "Finds the top-left sum needed by the summed-area algorithm for the
-  subgrid with top-left corner at [x y]."
+  subgrid with top-left corner [x y]."
   [x y summed-table]
   (if (or (<= (dec x) 0) (<= (dec y) 0))
     0
@@ -104,13 +104,13 @@
 
 (defn get-bottom-right-sum
   "Finds the bottom-right sum needed by the summed-area algorithm for the
-  subgrid with top-left corner at [x y]."
+  subgrid with top-left corner [x y]."
   [x y summed-table size]
   (get summed-table (get-index (dec (+ x size)) (dec (+ y size)))))
 
 (defn get-bottom-left-sum
   "Finds the bottom-left sum needed needed by the summed-area algorithm for
-  the subgrid with top-left corner at [x y]."
+  the subgrid with top-left corner [x y]."
   [x y summed-table size]
   (if (<= (dec x) 0)
     0
@@ -118,7 +118,7 @@
 
 (defn get-top-right-sum
   "Finds the top-right sum needed needed by the summed-area algorithm for
-  the subgrid with top-left corner at [x y]."
+  the subgrid with top-left corner [x y]."
   [x y summed-table size]
   (if (<= (dec y) 0)
     0
@@ -126,7 +126,7 @@
 
 (defn find-subgrid-power2
   "Calculates the sum of all values in the square subgrid of the given
-  size and top-left corner at [x y]."
+  size and top-left corner [x y]."
   [x y summed-table subgrid-size]
   (let [top-left-sum (get-top-left-sum x y summed-table)
         bottom-left-sum (get-bottom-left-sum x y summed-table subgrid-size)

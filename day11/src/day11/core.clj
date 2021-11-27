@@ -167,6 +167,15 @@
   []
   (second (find-max-power 3)))
 
+(defn day11-2
+  []
+  (let [grid (create-grid max-subgrid-size)
+        powers (mapv find-cell-power grid)
+        summed-table (create-summed-table powers)
+        [_ pos size] (find-max-subgrid summed-table grid)]
+    [pos size]))
+
 (defn -main
   []
-  (println (day11-1)))
+  (println (day11-1))
+  (println (day11-2)))

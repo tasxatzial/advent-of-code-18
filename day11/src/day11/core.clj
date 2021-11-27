@@ -2,6 +2,7 @@
   (:gen-class))
 
 (def grid-serial 6392)
+(def max-subgrid-size 300)
 
 ; --------------------------
 ; problem 1
@@ -57,6 +58,36 @@
 ; --------------------------
 ; problem 2
 
+(defn sum-lines
+  "Takes as input a collection of vectors of equal count. Returns a
+  vector in which every item is the sum of all vectors up to and including
+  that item."
+  [coll]
+  (reduce (fn [result line]
+            (conj result (mapv + (last result) line)))
+          [(into [] (first coll))] (rest coll)))
+
+(defn select-nth
+  "Takes as input a collection of vectors and returns a new vector that
+  contains the nth elements of each vector."
+  [n coll]
+  (mapv #(get % n) coll))
+
+(defn transpose
+  "Returns the transpose of a matrix stored as a vector of row or column vectors."
+  [coll]
+  (mapv #(select-nth % coll) (range 0 max-subgrid-size)))
+
+(defn create-summed-table
+  "Returns the summed-area table of the vector that contains the
+  power of each [x y] location. The table is stored as a vector
+  of vectors, each vector corresponds to a grid row."
+  [cell-powers]
+  (let [by-row-partition (partition max-subgrid-size cell-powers)
+        partial-sum1 (sum-lines by-row-partition)
+        by-col-partition (transpose partial-sum1)
+        partial-sum2 (sum-lines by-col-partition)]
+    (transpose partial-sum2)))
 
 ; --------------------------
 ; results

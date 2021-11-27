@@ -150,6 +150,16 @@
                     result))))
             [init-power [1 1]] (rest grid))))
 
+(defn find-max-subgrid
+  "Finds the max power among all subgrids."
+  [summed-table grid]
+  (reduce (fn [result size]
+            (let [[power pos] (find-max-power2 size summed-table grid)]
+              (if (> power (first result))
+                [power pos size]
+                result)))
+          [0 [0 0] 0] (range 1 (inc max-subgrid-size))))
+
 ; --------------------------
 ; results
 

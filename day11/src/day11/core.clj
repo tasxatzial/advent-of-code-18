@@ -134,6 +134,22 @@
         top-right-sum (get-top-right-sum x y summed-table subgrid-size)]
     (+ top-left-sum (- bottom-right-sum top-right-sum bottom-left-sum))))
 
+(defn find-max-power2
+  "Finds the max power among all subgrids of a given size.
+  Returns a vector containing the power and the top left corner of the
+  subgrid."
+  [size summed-table grid]
+  (let [init-power (find-subgrid-power2 0 0 summed-table size)]
+    (reduce (fn [[max-power _ :as result] [x y :as pos]]
+              (if (or (> (+ (dec x) size) max-subgrid-size)
+                      (> (+ (dec y) size) max-subgrid-size))
+                result
+                (let [power (find-subgrid-power2 (dec x) (dec y) summed-table size)]
+                  (if (> power max-power)
+                    [power pos]
+                    result))))
+            [init-power [1 1]] (rest grid))))
+
 ; --------------------------
 ; results
 

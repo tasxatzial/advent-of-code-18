@@ -87,7 +87,52 @@
         partial-sum1 (sum-lines by-row-partition)
         by-col-partition (transpose partial-sum1)
         partial-sum2 (sum-lines by-col-partition)]
-    (transpose partial-sum2)))
+    (reduce into (transpose partial-sum2))))
+
+(defn get-index
+  "Returns the corresponding index of [x y] in a one dimensional vector."
+  [x y]
+  (+ x (* y max-subgrid-size)))
+
+(defn get-top-left-sum
+  "Finds the top-left sum needed by the summed-area algorithm for the
+  subgrid with top-left corner at [x y]."
+  [x y summed-table]
+  (if (or (<= (dec x) 0) (<= (dec y) 0))
+    0
+    (get summed-table (get-index (dec x) (dec y)))))
+
+(defn get-bottom-right-sum
+  "Finds the bottom-right sum needed by the summed-area algorithm for the
+  subgrid with top-left corner at [x y]."
+  [x y summed-table size]
+  (get summed-table (get-index (dec (+ x size)) (dec (+ y size)))))
+
+(defn get-bottom-left-sum
+  "Finds the bottom-left sum needed needed by the summed-area algorithm for
+  the subgrid with top-left corner at [x y]."
+  [x y summed-table size]
+  (if (<= (dec x) 0)
+    0
+    (get summed-table (get-index (dec x) (+ (dec size) y)))))
+
+(defn get-top-right-sum
+  "Finds the top-right sum needed needed by the summed-area algorithm for
+  the subgrid with top-left corner at [x y]."
+  [x y summed-table size]
+  (if (<= (dec y) 0)
+    0
+    (get summed-table (get-index (dec (+ x size)) (dec y)))))
+
+(defn find-subgrid-power2
+  "Calculates the sum of all values in the square subgrid of the given
+  size and top-left corner at [x y]."
+  [x y summed-table subgrid-size]
+  (let [top-left-sum (get-top-left-sum x y summed-table)
+        bottom-left-sum (get-bottom-left-sum x y summed-table subgrid-size)
+        bottom-right-sum (get-bottom-right-sum x y summed-table subgrid-size)
+        top-right-sum (get-top-right-sum x y summed-table subgrid-size)]
+    (+ top-left-sum (- bottom-right-sum top-right-sum bottom-left-sum))))
 
 ; --------------------------
 ; results

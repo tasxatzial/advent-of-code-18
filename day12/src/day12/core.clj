@@ -5,7 +5,7 @@
 ; common
 
 (def input-file "resources\\input.txt")
-(def init-state "##.#.####..#####..#.....##....#.#######..#.#...........#......##...##.#...####..##.#..##.....#..####")
+(def init-state (vec "##.#.####..#####..#.....##....#.#######..#.#...........#......##...##.#...####..##.#..##.....#..####"))
 
 (defn parse-rule
   "Parses an input line that represents a rule to the appropriate structure."
@@ -35,7 +35,7 @@
   (get coll (- (count coll) n)))
 
 (defn new-state-prefix
-  "Returns a vector containing the number of \. that are necessary to be added
+  "Returns a vector containing the number of \\. that are necessary to be added
   as a prefix to the given state."
   [state]
   (cond
@@ -44,7 +44,7 @@
     :else []))
 
 (defn new-state-suffix
-  "Returns a vector containing the number of \. that are necessary to be added
+  "Returns a vector containing the number of \\. that are necessary to be added
   as a suffix to the given state."
   [state]
   (cond
@@ -62,8 +62,8 @@
     state))
 
 (defn trim-state
-  "Removes any unnecessary \. from the start or end of the state.
-  prefix-count and suffix-count count the number of \. that have already been
+  "Removes any unnecessary \\. from the start or end of the state.
+  prefix-count and suffix-count count the number of \\. that have already been
   added to the state as a prefix and suffix in the current iteration.
   Returns a vector containing the updated state and the adjusted prefix-count."
   [state prefix-count suffix-count]
@@ -99,6 +99,21 @@
      (let [[prefix-count new-state] (next-state state)]
        (recur new-state (dec generations) (+ total-prefix prefix-count))))))
 
+(defn add-plant-indexes-after
+  "Advances the state by the given number of generations and computes the sum of the indexes of the
+  pots that have plants in the final state."
+  [generations]
+  (let [[prefix-count final-state] (evolve init-state generations)
+        pot-indexes (range (- prefix-count) (- (count final-state) prefix-count))
+        plant-indexes (->> (zipmap pot-indexes final-state)
+                           (filter #(= \# (second %)))
+                           (map first))]
+    (apply + plant-indexes)))
+
+(defn day12-1
+  []
+  (add-plant-indexes-after 20))
+
 (defn -main
   []
-  (println rules))
+  (println (day12-1)))

@@ -26,6 +26,32 @@
 
 (def rules (parse-rules (slurp input-file)))
 
+; --------------------------
+; problem 1
+
+(defn get-last
+  "Returns the nth element of coll (counting from the end)"
+  [coll n]
+  (get coll (- (count coll) n)))
+
+(defn new-state-prefix
+  "Returns a vector containing the number of \. that are necessary to be added
+  as a prefix to the given state."
+  [state]
+  (cond
+    (= \# (get state 2)) [\. \.]
+    (= \# (get state 3)) [\.]
+    :else []))
+
+(defn new-state-suffix
+  "Returns a vector containing the number of \. that are necessary to be added
+  as a suffix to the given state."
+  [state]
+  (cond
+    (= \# (get-last state 3)) [\. \.]
+    (= \# (get-last state 4)) [\.]
+    :else []))
+
 (defn -main
   []
   (println rules))

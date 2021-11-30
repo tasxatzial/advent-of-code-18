@@ -52,6 +52,28 @@
     (= \# (get-last state 4)) [\.]
     :else []))
 
+(defn augment-state
+  "Expands the stat vector with the prefix and suffix vectors."
+  [state prefix suffix]
+  (if (seq suffix)
+    (if (seq prefix)
+      (into (into prefix state) suffix)
+      (into state suffix))
+    state))
+
+(defn trim-state
+  "Removes any unnecessary \. from the start or end of the state.
+  prefix-count and suffix-count count the number of \. that have already been
+  added to the state as a prefix and suffix in the current iteration.
+  Returns a vector containing the updated state and the adjusted prefix-count."
+  [state prefix-count suffix-count]
+  (if (and (zero? prefix-count) (= \. (get state 4)))
+    (if (and (zero? suffix-count) (= \. (get-last state 5)))
+      [(dec prefix-count) (subvec state 1 (- (count state) 2))]
+      [(dec prefix-count) (subvec state 1)])
+    [prefix-count state]))
+
+
 (defn -main
   []
   (println rules))

@@ -86,6 +86,19 @@
         next-state (mapv #(get rules %) state-patterns)]
     [new-prefix-count (conj (into [\. \.] next-state) \. \.)]))
 
+(defn evolve
+  "Advances the state by the given number of generations. Returns a vector containing:
+  1) how many empty pots have been added to the start of the final state
+  2) the final state"
+  ([state generations]
+   (let [initial-state (conj (into [\. \. \. \.] state) \. \. \. \.)]
+     (evolve initial-state generations 4)))
+  ([state generations total-prefix]
+   (if (zero? generations)
+     [total-prefix state]
+     (let [[prefix-count new-state] (next-state state)]
+       (recur new-state (dec generations) (+ total-prefix prefix-count))))))
+
 (defn -main
   []
   (println rules))

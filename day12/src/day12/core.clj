@@ -73,6 +73,18 @@
       [(dec prefix-count) (subvec state 1)])
     [prefix-count state]))
 
+(defn next-state
+  "Finds the next state of the given state. Returns a vector containing:
+  1) how many empty pots have been added to the start of the state
+  2) the new state"
+  [state]
+  (let [prefix (new-state-prefix state)
+        suffix (new-state-suffix state)
+        augmented-state (augment-state state prefix suffix)
+        [new-prefix-count ready-state] (trim-state augmented-state (count prefix) (count suffix))
+        state-patterns (mapv #(subvec ready-state (- % 2) (+ % 3)) (range 2 (- (count ready-state) 2)))
+        next-state (mapv #(get rules %) state-patterns)]
+    [new-prefix-count (conj (into [\. \.] next-state) \. \.)]))
 
 (defn -main
   []

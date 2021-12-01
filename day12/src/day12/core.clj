@@ -26,9 +26,6 @@
 
 (def rules (parse-rules (slurp input-file)))
 
-; --------------------------
-; problem 1
-
 (defn get-last
   "Returns the nth element of coll (counting from the end)"
   [coll n]
@@ -97,7 +94,9 @@
    (if (zero? generations)
      [total-prefix state]
      (let [[prefix-count new-state] (next-state state)]
-       (recur new-state (dec generations) (+ total-prefix prefix-count))))))
+       (if (= state new-state)
+         [(+ total-prefix (* generations prefix-count)) state]
+         (recur new-state (dec generations) (+ total-prefix prefix-count)))))))
 
 (defn add-plant-indexes-after
   "Advances the state by the given number of generations and computes the sum of the indexes of the
@@ -111,15 +110,17 @@
     (apply + plant-indexes)))
 
 ; --------------------------
-; problem 2
-
-; --------------------------
 ; results
 
 (defn day12-1
   []
   (add-plant-indexes-after 20))
 
+(defn day12-2
+  []
+  (add-plant-indexes-after 50000000000))
+
 (defn -main
   []
-  (println (day12-1)))
+  (println (day12-1))
+  (println (day12-2)))

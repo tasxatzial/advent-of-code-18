@@ -110,6 +110,12 @@
                            (map first))]
     (apply + plant-indexes)))
 
+; --------------------------
+; problem 2
+
+; --------------------------
+; results
+
 (defn day12-1
   []
   (add-plant-indexes-after 20))

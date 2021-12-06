@@ -7,7 +7,8 @@
 (def input-file "resources\\input.txt")
 
 (defn track-type
-  "Returns a keyword representing the track type."
+  "Returns a keyword representing the track type. If the character is a
+  cart character, it returns a keyword describing the cart direction."
   [ch]
   (case ch
     \- :horizontal
@@ -16,29 +17,32 @@
     \/ :slash
     \\ :backslash
     \space :space
-    (\> \< \v \^) :cart))
+    \> :cart-right
+    \< :cart-left
+    \v :cart-down
+    \^ :cart-up))
 
 (defn parse-line
   "Parses the ith-line of the input file and creates an appropriate structure.
   Returns a seq of [[x y] track-type]"
   [i s]
-  (let [parsed (map #(vector [%2 i] (track-type %1)) s (range (count s)))]
-    (filter #(not= :space (second %)) parsed)))
+  (map #(vector [%2 i] (track-type %1))
+       s (range (count s))))
 
 (defn parse
   "Parses the input string and creates an appropriate structure.
   Returns a map of [[x y] track-type]"
   [s]
   (let [split-lines (clojure.string/split-lines s)
-        parsed (map #(parse-line %1 %2) (range (count split-lines)) split-lines)]
+        parsed (map #(parse-line %1 %2)
+                    (range (count split-lines)) split-lines)]
     (reduce into {} parsed)))
 
 (def input-tracks (parse (slurp input-file)))
 
 (defn get-neighbors
-  "Finds the neighbors of a track located at [x y].
-  Returns a 4 item vector of [[x y] track-type]. Neighbors are listed in the
-  following order: top bottom left right."
+  "Finds the neighbors of a track located at [x y]. Neighbors are listed in the following order:
+  top bottom left right. Returns a 4 item vector of [[x y] track-type]."
   [[x y] tracks]
   (let [top (get tracks [x (dec y)])
         bottom (get tracks [x (inc y)])
@@ -47,7 +51,9 @@
     [top bottom left right]))
 
 (defn get-track-by-neighbors
-  "Returns the track type at [x y] by examining its neighbors only.
+  "Returns the track type at [x y] by examining its direct neighbors only. If there is a cart on
+  the track it still returns the correct type of the track. Assumes that none of the neighbors are
+  occupied by carts thus the function can be used only on the initial tracks (before any cart movements).
   Returns a [[x y] track-type]."
   [[loc _] tracks]
   (let [[top bottom left right] (get-neighbors loc tracks)]
@@ -65,14 +71,25 @@
       (and (= :horizontal left) (= :vertical bottom)) [loc :backslash]
       (and (= :horizontal right) (= :vertical bottom)) [loc :backslash])))
 
+(defn cart?
+  "Returns true if the track-type represents a cart, false otherwise."
+  [[_ track-type]]
+  (or (= :cart-down track-type)
+      (= :cart-left track-type)
+      (= :cart-right track-type)
+      (= :cart-up track-type)))
+
 (defn find-carts
   "Finds the tracks that are occupied by carts.
-  Returns a seq of [[x y] :cart]"
+  Returns a seq of [[x y] direction turn-choice].
+  Direction & Turn-choice are one of: cart-down :cart-left :cart-right :cart-up.
+  Turn-choice indicates what the cart should do when it arrives at an intersection."
   [tracks]
-  (filter #(= :cart (second %)) tracks))
+  (let [carts (filter #(cart? %) tracks)]
+    (map #(vector (first %) (second %) :left) carts)))
 
 (defn replace-carts
-  "Scans the initial parsed tracks and replaces all tracks that have a cart
+  "Scans the initial track info and replaces all tracks that have a cart
   character with the correct track character."
   [tracks]
   (let [carts (find-carts tracks)
@@ -80,7 +97,8 @@
     (into tracks replaced)))
 
 (def tracks (replace-carts input-tracks))
+(def carts (sort-by (juxt first second) (find-carts input-tracks)))
 
 (defn -main
   []
-  (println tracks))
+  (println carts))

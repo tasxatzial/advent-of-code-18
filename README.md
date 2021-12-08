@@ -2,7 +2,11 @@
 
 My solutions for [advent of code 2018](https://adventofcode.com/2018). Work in progress.
 
---- Credits ---
+Unsolved problems:
+
+* Day 9 pt2
+
+## Credits
 
 Puzzles: [Eric Wastl](https://twitter.com/ericwastl)
 

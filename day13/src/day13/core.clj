@@ -108,6 +108,56 @@
     :cart-up [x (dec y)]
     :cart-down [x (inc y)]))
 
+; simple mapping of the track types to integers
+(def track-type-num
+  {:horizontal 10
+   :vertical 20
+   :slash 30
+   :backslash 40
+   :intersect 50})
+
+; simple mapping of the cart directions to integers
+(def cart-direction-num
+  {:cart-up 1
+   :cart-down 2
+   :cart-right 3
+   :cart-left 4})
+
+(defn next-direction
+  "Returns the next direction of a cart that has just moved to a track of the given
+  type. Turn-choice denotes how it should turn if next track type is an intersection."
+  [next-track-type cart-direction turn-choice]
+  (let [id (+ (track-type-num next-track-type) (cart-direction-num cart-direction))]
+    (case id
+      13 :cart-right
+      14 :cart-left
+      21 :cart-up
+      22 :cart-down
+      31 :cart-right
+      32 :cart-left
+      33 :cart-up
+      34 :cart-down
+      41 :cart-left
+      42 :cart-right
+      43 :cart-down
+      44 :cart-up
+      51 (case turn-choice
+           :left :cart-left
+           :right :cart-right
+           :straight :cart-up)
+      52 (case turn-choice
+           :left :cart-right
+           :right :cart-left
+           :straight :cart-down)
+      53 (case turn-choice
+           :left :cart-up
+           :right :cart-down
+           :straight :cart-right)
+      54 (case turn-choice
+           :left :cart-down
+           :right :cart-up
+           :straight :cart-left))))
+
 (defn -main
   []
   (println carts))

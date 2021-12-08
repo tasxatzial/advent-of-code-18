@@ -195,6 +195,27 @@
           (recur rest-carts (conj new-carts new-cart))))
       new-carts)))
 
+; --------------------------
+; problem 1
+
+(defn simulate1
+  "Runs the simulation for the given number of steps or until a collision has occurred.
+  Returns nil if no collision has occurred after the given steps. Else it returns the
+  location of the first collision."
+  [steps carts]
+  (when (pos? steps)
+    (let [result (move-carts-one-step carts)]
+      (if (coll? (first result))
+        (recur (dec steps) result)
+        result))))
+
+; --------------------------
+; results
+
+(defn day08-1
+  []
+  (simulate1 200 carts))
+
 (defn -main
   []
-  (println carts))
+  (println (day08-1)))

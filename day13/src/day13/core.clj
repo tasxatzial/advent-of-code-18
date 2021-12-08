@@ -158,6 +158,22 @@
            :right :cart-up
            :straight :cart-left))))
 
+; what turn a cart should take when the previous turn is given
+(def next-turn-choice
+  {:left :straight
+   :straight :right
+   :right :left})
+
+(defn update-cart
+  "Updates the cart after 1 tick."
+  [[[x y] cart-direction turn-choice]]
+  (let [new-loc (next-loc [x y] cart-direction)
+        new-track (get tracks new-loc)
+        new-direction (next-direction new-track cart-direction turn-choice)]
+    (if (= :intersect new-track)
+      [new-loc new-direction (next-turn-choice turn-choice)]
+      [new-loc new-direction turn-choice])))
+
 (defn -main
   []
   (println carts))

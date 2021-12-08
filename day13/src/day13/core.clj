@@ -99,6 +99,15 @@
 (def tracks (replace-carts input-tracks))
 (def carts (sort-by (juxt first second) (find-carts input-tracks)))
 
+(defn next-loc
+  "Returns the next location of a cart that is in [x y] and has the given direction."
+  [[x y] cart-direction]
+  (case cart-direction
+    :cart-left [(dec x) y]
+    :cart-right [(inc x) y]
+    :cart-up [x (dec y)]
+    :cart-down [x (inc y)]))
+
 (defn -main
   []
   (println carts))

@@ -174,6 +174,27 @@
       [new-loc new-direction (next-turn-choice turn-choice)]
       [new-loc new-direction turn-choice])))
 
+(defn collided?
+  "Returns true if the given location is also a location of one of the carts,
+  false otherwise."
+  [loc carts]
+  (let [cart-locations (set (map first carts))]
+    (contains? cart-locations loc)))
+
+(defn move-carts-one-step
+  "Updates the carts after one tick. If no collision happened, it returns
+  the updated carts. Else it returns the location of the collision."
+  [carts]
+  (loop [[cart & rest-carts] carts
+         new-carts []]
+    (if cart
+      (let [new-cart (update-cart cart)
+            new-loc (first new-cart)]
+        (if (collided? new-loc carts)
+          new-loc
+          (recur rest-carts (conj new-carts new-cart))))
+      new-carts)))
+
 (defn -main
   []
   (println carts))

@@ -181,9 +181,12 @@
   (let [cart-locations (set (map first carts))]
     (contains? cart-locations loc)))
 
-(defn move-carts-one-step
+; --------------------------
+; problem 1
+
+(defn move-carts-one-step1
   "Updates the carts after one tick. If no collision happened, it returns
-  the updated carts. Else it returns the location of the collision."
+  the updated carts. Else it returns the location of the collision (problem 1)."
   [carts]
   (loop [[cart & rest-carts] carts
          new-carts []]
@@ -195,16 +198,13 @@
           (recur rest-carts (conj new-carts new-cart))))
       (sort-by (juxt first second) new-carts))))
 
-; --------------------------
-; problem 1
-
 (defn simulate1
   "Runs the simulation for the given number of steps or until a collision has happened.
   Returns nil if no collision has happened after the given steps. Else it returns the
-  location of the first collision."
+  location of the first collision (problem 1)."
   [steps carts]
   (when (pos? steps)
-    (let [result (move-carts-one-step carts)]
+    (let [result (move-carts-one-step1 carts)]
       (if (coll? (first result))
         (recur (dec steps) result)
         result))))
@@ -235,6 +235,18 @@
             (recur rest-carts (conj updated-carts new-cart)))))
       (sort-by (juxt first second) updated-carts))))
 
+(defn simulate2
+  "Runs the simulation for the given number of steps or until no further collisions are possible.
+  Crashed carts are removed immediately. Returns the remaining carts at the end of the last tick
+  (problem 2)."
+  [steps carts]
+  (if (pos? steps)
+    (let [new-carts (move-carts-one-step2 carts)]
+      (if (> (count new-carts) 1)
+        (recur (dec steps) new-carts)
+        new-carts))
+    carts))
+
 ; --------------------------
 ; results
 
@@ -242,6 +254,11 @@
   []
   (simulate1 200 carts))
 
+(defn day08-2
+  []
+  (simulate2 13000 carts))
+
 (defn -main
   []
-  (println (day08-1)))
+  (println (day08-1))
+  (println (day08-2)))

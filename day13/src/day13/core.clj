@@ -190,17 +190,17 @@
     (if cart
       (let [new-cart (update-cart cart)
             new-loc (first new-cart)]
-        (if (collided? new-loc carts)
+        (if (collided? new-loc (concat new-carts rest-carts))
           new-loc
           (recur rest-carts (conj new-carts new-cart))))
-      new-carts)))
+      (sort-by (juxt first second) new-carts))))
 
 ; --------------------------
 ; problem 1
 
 (defn simulate1
-  "Runs the simulation for the given number of steps or until a collision has occurred.
-  Returns nil if no collision has occurred after the given steps. Else it returns the
+  "Runs the simulation for the given number of steps or until a collision has happened.
+  Returns nil if no collision has happened after the given steps. Else it returns the
   location of the first collision."
   [steps carts]
   (when (pos? steps)

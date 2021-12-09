@@ -210,6 +210,32 @@
         result))))
 
 ; --------------------------
+; problem 2
+
+(defn remove-collided
+  "Returns a collection of all carts that are not in the given location."
+  [loc carts]
+  (filter #(not= loc (first %)) carts))
+
+(defn move-carts-one-step2
+  "Updates the carts after one tick. Returns the remaining carts after the crashed carts
+  have been removed (problem 2)."
+  [carts]
+  (loop [[cart & rest-carts] carts
+         updated-carts []]
+    (if cart
+      (let [new-cart (update-cart cart)
+            new-loc (first new-cart)]
+        (let [collided1 (collided? new-loc updated-carts)
+              collided2 (collided? new-loc rest-carts)]
+          (if (or collided1 collided2)
+            (let [rest-non-crashed (remove-collided new-loc rest-carts)
+                  updated-non-crashed (remove-collided new-loc updated-carts)]
+              (recur rest-non-crashed updated-non-crashed))
+            (recur rest-carts (conj updated-carts new-cart)))))
+      (sort-by (juxt first second) updated-carts))))
+
+; --------------------------
 ; results
 
 (defn day08-1

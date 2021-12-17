@@ -6,8 +6,6 @@ Unsolved problems:
 
 * Day 9 pt2
 
-## Credits
+Todo:
 
-Puzzles: [Eric Wastl](https://twitter.com/ericwastl)
-
-The readme of each day is the complete puzzle description, my solutions are also included.
+* Day 10

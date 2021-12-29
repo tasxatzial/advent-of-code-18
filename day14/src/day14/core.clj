@@ -25,6 +25,21 @@
         new-elf2-pos (rem (+ elf2-pos elf2-recipe 1) (count new-recipes))]
     [new-recipes new-elf1-pos new-elf2-pos]))
 
+(defn simulate
+  "Play the game until the condition specified by the given fn_stop function
+  is met. Returns the final vector of recipes."
+  ([fn_stop]
+   (simulate fn_stop starting-recipes elf1-pos elf2-pos))
+  ([fn-stop recipes elf1-pos elf2-pos]
+   (loop [recipes recipes
+          elf1-pos elf1-pos
+          elf2-pos elf2-pos]
+     (let [[new-recipes new-elf1-pos new-elf2-pos] (next-round recipes elf1-pos elf2-pos)]
+       (if (fn-stop new-recipes)
+         new-recipes
+         (recur new-recipes new-elf1-pos new-elf2-pos))))))
+
+
 (defn -main
   []
   (println (next-round starting-recipes elf1-pos elf2-pos)))

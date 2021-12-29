@@ -39,7 +39,29 @@
          new-recipes
          (recur new-recipes new-elf1-pos new-elf2-pos))))))
 
+; --------------------------
+; problem 1
+
+(def last-recipe-count 10)
+(def max-recipe-count (+ input last-recipe-count))
+
+(defn stop1
+  "Returns true if the condition specified by the rules is met (problem 1),
+  false otherwise."
+  [recipes]
+  (>= (count recipes) max-recipe-count))
+
+; --------------------------
+; results
+
+(defn day14-1
+  []
+  (let [recipes (simulate stop1)
+        last-recipes (drop input recipes)]
+    (if (= last-recipe-count (count last-recipes))
+      last-recipes
+      (butlast last-recipes))))
 
 (defn -main
   []
-  (println (next-round starting-recipes elf1-pos elf2-pos)))
+  (println (day14-1)))

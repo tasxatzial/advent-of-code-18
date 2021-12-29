@@ -46,10 +46,40 @@
 (def max-recipe-count (+ input last-recipe-count))
 
 (defn stop1
-  "Returns true if the condition specified by the rules is met (problem 1),
-  false otherwise."
+  "Returns true if the condition specified by the rules is met,
+  false otherwise (problem 1)"
   [recipes]
   (>= (count recipes) max-recipe-count))
+
+; --------------------------
+; problem 2
+
+(def recipe-batch-size 50)
+(def start-search-offset (- (+ 1 recipe-batch-size input-count)))
+
+(defn find-input
+  "If the sequence of the input digits appears in the recipes vector, return
+  the index of its first digit in the vector, else return nil.
+  Only the indices from (+ (count recipes) start-search-offset) are considered."
+  [recipes]
+  (let [start-index (+ (count recipes) start-search-offset)
+        end-index (inc (- (count recipes) input-count))]
+    (loop [i start-index]
+      (if (< i 0)
+        (recur 0)
+        (when (not= i end-index)
+          (let [s (subvec recipes i (+ i input-count))]
+            (if (= s input-vec)
+              i
+              (recur (inc i)))))))))
+
+(defn stop2
+  "Returns true if the condition specified by the rules is met,
+  false otherwise (problem 2)"
+  [recipes]
+  (let [r (rem (count recipes) recipe-batch-size)]
+    (and (or (= 0 r) (= 1 r))
+         (find-input recipes))))
 
 ; --------------------------
 ; results

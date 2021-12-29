@@ -92,6 +92,12 @@
       last-recipes
       (butlast last-recipes))))
 
+(defn day14-2
+  []
+  (let [recipes (simulate stop2)]
+    (find-input recipes)))
+
 (defn -main
   []
-  (println (day14-1)))
+  (println (day14-1))
+  (println (day14-2)))

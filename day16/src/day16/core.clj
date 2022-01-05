@@ -26,6 +26,91 @@
 
 (def samples (parse (slurp input1)))
 
+;; instruction functions, see problem description for explanations on how they work
+(defn addr
+  [[_ A B C] registers]
+  (let [res (+ (get registers A) (get registers B))]
+    (assoc registers C res)))
+
+(defn addi
+  [[_ A B C] registers]
+  (let [res (+ (get registers A) B)]
+    (assoc registers C res)))
+
+(defn mulr
+  [[_ A B C] registers]
+  (let [res (* (get registers A) (get registers B))]
+    (assoc registers C res)))
+
+(defn muli
+  [[_ A B C] registers]
+  (let [res (* (get registers A) B)]
+    (assoc registers C res)))
+
+(defn banr
+  [[_ A B C] registers]
+  (let [res (bit-and (get registers A) (get registers B))]
+    (assoc registers C res)))
+
+(defn bani
+  [[_ A B C] registers]
+  (let [res (bit-and (get registers A) B)]
+    (assoc registers C res)))
+
+(defn borr
+  [[_ A B C] registers]
+  (let [res (bit-and (get registers A) (get registers B))]
+    (assoc registers C res)))
+
+(defn bori
+  [[_ A B C] registers]
+  (let [res (bit-and (get registers A) B)]
+    (assoc registers C res)))
+
+(defn setr
+  [[_ A _ C] registers]
+  (assoc registers C (get registers A)))
+
+(defn seti
+  [[_ A _ C] registers]
+  (assoc registers C A))
+
+(defn gtir
+  [[_ A B C] registers]
+  (if (> A (get registers B))
+    (assoc registers C 1)
+    (assoc registers C 0)))
+
+(defn gtri
+  [[_ A B C] registers]
+  (if (> (get registers A) B)
+    (assoc registers C 1)
+    (assoc registers C 0)))
+
+(defn gtrr
+  [[_ A B C] registers]
+  (if (> (get registers A) (get registers B))
+    (assoc registers C 1)
+    (assoc registers C 0)))
+
+(defn eqir
+  [[_ A B C] registers]
+  (if (= A (get registers B))
+    (assoc registers C 1)
+    (assoc registers C 0)))
+
+(defn eqri
+  [[_ A B C] registers]
+  (if (= (get registers A) B)
+    (assoc registers C 1)
+    (assoc registers C 0)))
+
+(defn eqrr
+  [[_ A B C] registers]
+  (if (= (get registers A) (get registers B))
+    (assoc registers C 1)
+    (assoc registers C 0)))
+
 (defn -main
   []
-  (println samples))
+  (println (mulr [9 2 1 2] [3 2 1 1])))

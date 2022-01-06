@@ -98,14 +98,14 @@
 (defn parse-sample
   "Parses a collection of strings that represent a [before, instruction, after]
   sequence in the samples file and returns the sequence represented by a vector of
-  3 vectors, each vector contains 4 numbers."
+  3 vectors."
   [sample]
   (let [before (second (clojure.string/split (first sample) #": "))
         instr (str \[ (second sample) \])
         after (second (clojure.string/split (nth sample 2) #": "))]
     (mapv read-string [before instr after])))
 
-(defn parse
+(defn parse1
   "Parses the input string and returns a collection of samples.
   Each sample is a vector representing a [before, instruction, after] sequence
   in the samples file."
@@ -116,7 +116,7 @@
        (partition 3)
        (map parse-sample)))
 
-(def samples (parse (slurp input1)))
+(def samples (parse1 (slurp input1)))
 
 (defn count-sample-candidates
   "Returns the number of opcodes that behave like the given sample."
@@ -125,6 +125,22 @@
        (map #(= (% instruction before) after))
        (filter true?)
        count))
+
+; --------------------------
+; problem 2
+
+(def input2 "resources\\tests.txt")
+
+(defn parse2
+  "Parses the input string and returns a collection of vectors, each one representing
+  an instruction in the tests file."
+  [s]
+  (let [split-lines (clojure.string/split-lines s)]
+    (->> split-lines
+         (map #(clojure.string/split % #" "))
+         (map vec))))
+
+(def tests (parse2 (slurp input2)))
 
 ; --------------------------
 ; results
@@ -138,4 +154,5 @@
 
 (defn -main
   []
-  (println (day16-1)))
+  (println (day16-1))
+  (println tests))

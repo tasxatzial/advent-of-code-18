@@ -1,30 +1,6 @@
 (ns day16.core
-  (:gen-class))
-
-(def input1 "resources\\samples.txt")
-
-(defn parse-sample
-  "Parses a collection of strings that represent a [before, instruction, after]
-  sequence in the samples file and returns the sequence represented by a vector of
-  3 vectors, each vector contains 4 numbers."
-  [sample]
-  (let [before (second (clojure.string/split (first sample) #": "))
-        instr (str \[ (second sample) \])
-        after (second (clojure.string/split (nth sample 2) #": "))]
-    (mapv read-string [before instr after])))
-
-(defn parse
-  "Parses the input string and returns a collection of samples.
-  Each sample is a vector representing a [before, instruction, after] sequence
-  in the samples file."
-  [s]
-  (->> s
-       (clojure.string/split-lines)
-       (filter #(not= "" %))
-       (partition 3)
-       (map parse-sample)))
-
-(def samples (parse (slurp input1)))
+  (:gen-class)
+  (:require [clojure.set :refer [intersection]]))
 
 ;; instruction functions, see problem description for explanations on how they work
 (defn addr
@@ -111,6 +87,55 @@
     (assoc registers C 1)
     (assoc registers C 0)))
 
+(def opcodes
+  [addr addi mulr muli banr bani borr bori setr seti gtir gtri gtrr eqir eqri eqrr])
+
+; --------------------------
+; problem 1
+
+(def input1 "resources\\samples.txt")
+
+(defn parse-sample
+  "Parses a collection of strings that represent a [before, instruction, after]
+  sequence in the samples file and returns the sequence represented by a vector of
+  3 vectors, each vector contains 4 numbers."
+  [sample]
+  (let [before (second (clojure.string/split (first sample) #": "))
+        instr (str \[ (second sample) \])
+        after (second (clojure.string/split (nth sample 2) #": "))]
+    (mapv read-string [before instr after])))
+
+(defn parse
+  "Parses the input string and returns a collection of samples.
+  Each sample is a vector representing a [before, instruction, after] sequence
+  in the samples file."
+  [s]
+  (->> s
+       (clojure.string/split-lines)
+       (filter #(not= "" %))
+       (partition 3)
+       (map parse-sample)))
+
+(def samples (parse (slurp input1)))
+
+(defn count-sample-candidates
+  "Returns the number of opcodes that behave like the given sample."
+  [[before instruction after :as sample]]
+  (->> opcodes
+       (map #(= (% instruction before) after))
+       (filter true?)
+       count))
+
+; --------------------------
+; results
+
+(defn day16-1
+  []
+  (->> samples
+       (map count-sample-candidates)
+       (filter #(>= % 3))
+       count))
+
 (defn -main
   []
-  (println (mulr [9 2 1 2] [3 2 1 1])))
+  (println (day16-1)))

@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [clojure.set :refer [intersection]]))
 
-;; instruction functions, see problem description for explanations on how they work
+;; opcode functions, see problem description for explanations on how they work
 (defn addr
   [[_ A B C] registers]
   (let [res (+ (get registers A) (get registers B))]
@@ -141,6 +141,33 @@
          (map vec))))
 
 (def tests (parse2 (slurp input2)))
+
+(defn find-sample-candidates
+  "Returns all opcode functions that behave like the given sample. If called with 0 arguments
+  it returns the opcode functions for every sample."
+  ([]
+   (map find-sample-candidates samples))
+  ([[before instruction after :as sample]]
+   (->> opcodes
+        (map #(and (= (% instruction before) after) %))
+        (filter (complement false?))
+        (vector (first instruction)))))
+
+(defn find-opcode-candidates
+  "Returns a map of {opcode-num -> candidate opcode functions} by parsing all samples.
+  This map can be further reduced to the final map of {opcode-num -> opcode function}."
+  ([]
+   (let [candidates (find-sample-candidates)
+         op-codes (range (count opcodes))]
+     (->> op-codes
+          (map #(find-opcode-candidates % candidates))
+          (zipmap (range (count opcodes))))))
+  ([op-code candidates]
+   (->> candidates
+        (filter #(= op-code (first %)))
+        (map (comp set second))
+        (apply intersection)
+        seq)))
 
 ; --------------------------
 ; results

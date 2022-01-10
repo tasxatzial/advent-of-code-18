@@ -167,14 +167,13 @@
    (->> candidates
         (filter #(= op-code (first %)))
         (map (comp set second))
-        (apply intersection)
-        seq)))
+        (apply intersection))))
 
 (defn remove-candidate
   "Removes the given func from each collection in the candidates."
   [candidates func]
-  (reduce (fn [result [opcode opcode-candidates]]
-            (assoc result opcode (remove #{func} opcode-candidates)))
+  (reduce (fn [result candidate]
+            (update result (first candidate) #(disj % func)))
           candidates candidates))
 
 (defn find-opcode-fn
@@ -187,17 +186,14 @@
      solution
      (loop [candidates candidates]
        (let [[opcode opcode-candidates] (first candidates)]
-         (if (empty? opcode-candidates)
-           nil
-           (let [first-candidate (first opcode-candidates)
+         (when (seq opcode-candidates)
+           (let [selected (first opcode-candidates)
                  new-candidates (-> candidates
                                     (dissoc opcode)
-                                    (remove-candidate first-candidate))
-                 new-solution (assoc solution opcode first-candidate)]
+                                    (remove-candidate selected))
+                 new-solution (assoc solution opcode selected)]
              (or (find-opcode-fn new-candidates new-solution)
-                 (let [new-candidates (->> opcode-candidates
-                                           (remove #{first-candidate})
-                                           (assoc candidates opcode))]
+                 (let [new-candidates (update candidates opcode #(disj % selected))]
                    (recur new-candidates))))))))))
 
 (defn run-tests

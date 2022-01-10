@@ -35,12 +35,12 @@
 
 (defn borr
   [[_ A B C] registers]
-  (let [res (bit-and (get registers A) (get registers B))]
+  (let [res (bit-or (get registers A) (get registers B))]
     (assoc registers C res)))
 
 (defn bori
   [[_ A B C] registers]
-  (let [res (bit-and (get registers A) B)]
+  (let [res (bit-or (get registers A) B)]
     (assoc registers C res)))
 
 (defn setr

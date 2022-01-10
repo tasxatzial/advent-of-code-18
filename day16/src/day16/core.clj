@@ -177,11 +177,11 @@
             (assoc result opcode (remove #{func} opcode-candidates)))
           candidates candidates))
 
-(defn find-opcodes
+(defn find-opcode-fn
   "Finds the correct function for each opcode by using a backtracking algorithm."
   ([]
    (let [candidates (find-opcode-candidates)]
-     (find-opcodes candidates {})))
+     (find-opcode-fn candidates {})))
   ([candidates solution]
    (if (empty? candidates)
      solution
@@ -194,12 +194,21 @@
                                     (dissoc opcode)
                                     (remove-candidate first-candidate))
                  new-solution (assoc solution opcode first-candidate)]
-             (or (find-opcodes new-candidates new-solution)
+             (or (find-opcode-fn new-candidates new-solution)
                  (let [new-candidates (->> opcode-candidates
                                            (remove #{first-candidate})
                                            (assoc candidates opcode))]
                    (recur new-candidates))))))))))
 
+(defn run-tests
+  "Runs the tests for problem 2."
+  []
+  (let [opcode->fn (find-opcode-fn)]
+    (reduce (fn [result test]
+              (let [opcode (first test)
+                    opcode-fn (get opcode->fn opcode)]
+                (opcode-fn test result)))
+            [0 0 0 0] tests)))
 ; --------------------------
 ; results
 
@@ -210,7 +219,11 @@
        (filter #(>= % 3))
        count))
 
+(defn day16-2
+  []
+  (run-tests))
+
 (defn -main
   []
   (println (day16-1))
-  (println (find-opcodes)))
+  (println (day16-2)))

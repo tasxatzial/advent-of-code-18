@@ -62,6 +62,21 @@
            \#
            \.))))
 
+(def grid (create-grid))
+
+(defn simulate
+  "Runs the simulation for the given number of steps."
+  ([steps]
+   (simulate steps acres))
+  ([steps acres]
+   (if (zero? steps)
+     acres
+     (let [new-acres (->> grid
+                          (map #(next-state acres %))
+                          (partition columns)
+                          (mapv vec))]
+       (recur (dec steps) new-acres)))))
+
 (defn -main
   []
-  (println (next-state acres [0 0])))
+  (println (simulate 10)))

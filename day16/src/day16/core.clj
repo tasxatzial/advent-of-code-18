@@ -137,8 +137,7 @@
   [s]
   (let [split-lines (clojure.string/split-lines s)]
     (->> split-lines
-         (map #(clojure.string/split % #" "))
-         (map vec))))
+         (map #(read-string (str \[ % \]))))))
 
 (def tests (parse2 (slurp input2)))
 

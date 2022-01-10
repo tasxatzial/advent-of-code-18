@@ -1,6 +1,7 @@
 (ns day16.core
   (:gen-class)
-  (:require [clojure.set :refer [intersection]]))
+  (:require [clojure.set :refer [intersection]]
+            [clojure.data.priority-map :refer [priority-map-keyfn]]))
 
 ;; opcode functions, see problem description for explanations on how they work
 (defn addr
@@ -160,13 +161,44 @@
          op-codes (range (count opcode-fns))]
      (->> op-codes
           (map #(find-opcode-candidates % candidates))
-          (zipmap (range (count opcode-fns))))))
+          (zipmap (range (count opcode-fns)))
+          (into (priority-map-keyfn count)))))
   ([op-code candidates]
    (->> candidates
         (filter #(= op-code (first %)))
         (map (comp set second))
         (apply intersection)
         seq)))
+
+(defn remove-candidate
+  "Removes the given func from each collection in the candidates."
+  [candidates func]
+  (reduce (fn [result [opcode opcode-candidates]]
+            (assoc result opcode (remove #{func} opcode-candidates)))
+          candidates candidates))
+
+(defn find-opcodes
+  "Finds the correct function for each opcode by using a backtracking algorithm."
+  ([]
+   (let [candidates (find-opcode-candidates)]
+     (find-opcodes candidates {})))
+  ([candidates solution]
+   (if (empty? candidates)
+     solution
+     (loop [candidates candidates]
+       (let [[opcode opcode-candidates] (first candidates)]
+         (if (empty? opcode-candidates)
+           nil
+           (let [first-candidate (first opcode-candidates)
+                 new-candidates (-> candidates
+                                    (dissoc opcode)
+                                    (remove-candidate first-candidate))
+                 new-solution (assoc solution opcode first-candidate)]
+             (or (find-opcodes new-candidates new-solution)
+                 (let [new-candidates (->> opcode-candidates
+                                           (remove #{first-candidate})
+                                           (assoc candidates opcode))]
+                   (recur new-candidates))))))))))
 
 ; --------------------------
 ; results
@@ -181,4 +213,4 @@
 (defn -main
   []
   (println (day16-1))
-  (println tests))
+  (println (find-opcodes)))

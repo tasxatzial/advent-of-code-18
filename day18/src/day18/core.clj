@@ -44,6 +44,24 @@
         y (range columns)]
     [x y]))
 
+(defn next-state
+  "Returns the next state of an acre at loc."
+  [acres loc]
+  (let [loc-acre (get-in acres loc)
+        adjacent-acres (get-adjacent acres loc)
+        adjacent-freq (frequencies adjacent-acres)]
+    (case loc-acre
+      \. (if (>= (get adjacent-freq \| 0) 3)
+           \|
+           \.)
+      \| (if (>= (get adjacent-freq \# 0) 3)
+           \#
+           \|)
+      \# (if (and (>= (get adjacent-freq \# 0) 1)
+                  (>= (get adjacent-freq \| 0) 1))
+           \#
+           \.))))
+
 (defn -main
   []
-  (println (create-grid)))
+  (println (next-state acres [0 0])))

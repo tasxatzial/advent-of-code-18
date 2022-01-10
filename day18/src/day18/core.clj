@@ -77,6 +77,11 @@
                           (mapv vec))]
        (recur (dec steps) new-acres)))))
 
+(defn day18
+  [steps]
+  (let [final-acres-freq (frequencies (flatten (simulate steps)))]
+    (* (get final-acres-freq \#) (get final-acres-freq \|))))
+
 (defn -main
   []
-  (println (simulate 10)))
+  (println (day18 10)))

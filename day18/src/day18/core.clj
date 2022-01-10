@@ -11,10 +11,17 @@
   Each vector represents a line in the input file.
   The contents of [i j] can be retrieved by get-in."
   [s]
-  (let [split-lines (clojure.string/split-lines s)]
-    (mapv vec split-lines)))
+  (let [split-lines (clojure.string/split-lines s)
+        rows (count split-lines)
+        columns (count (first split-lines))]
+    {:acres (mapv vec split-lines)
+     :rows rows
+     :columns columns}))
 
-(def acres (parse (slurp input-file)))
+(def parsed-input (parse (slurp input-file)))
+(def acres (:acres parsed-input))
+(def rows (:rows parsed-input))
+(def columns (:columns parsed-input))
 
 (defn get-adjacent
   "Returns the values of adjacent locations to [x y]."
@@ -30,6 +37,13 @@
     (filter (complement nil?)
             [top-left top top-right left right bottom-left bottom bottom-right])))
 
+(defn create-grid
+  "Returns a collection of all [x y] locations."
+  []
+  (for [x (range rows)
+        y (range columns)]
+    [x y]))
+
 (defn -main
   []
-  (println (get-adjacent acres [0 0])))
+  (println (create-grid)))

@@ -87,7 +87,7 @@
     (assoc registers C 1)
     (assoc registers C 0)))
 
-(def opcodes
+(def opcode-fns
   [addr addi mulr muli banr bani borr bori setr seti gtir gtri gtrr eqir eqri eqrr])
 
 ; --------------------------
@@ -121,7 +121,7 @@
 (defn count-sample-candidates
   "Returns the number of opcodes that behave like the given sample."
   [[before instruction after :as sample]]
-  (->> opcodes
+  (->> opcode-fns
        (map #(= (% instruction before) after))
        (filter true?)
        count))
@@ -142,25 +142,25 @@
 (def tests (parse2 (slurp input2)))
 
 (defn find-sample-candidates
-  "Returns all opcode functions that behave like the given sample. If called with 0 arguments
-  it returns the opcode functions for every sample."
+  "Returns all functions that behave like the given sample. If called with 0 arguments
+  it returns the functions for every sample."
   ([]
    (map find-sample-candidates samples))
   ([[before instruction after :as sample]]
-   (->> opcodes
+   (->> opcode-fns
         (map #(and (= (% instruction before) after) %))
         (filter (complement false?))
         (vector (first instruction)))))
 
 (defn find-opcode-candidates
-  "Returns a map of {opcode-num -> candidate opcode functions} by parsing all samples.
-  This map can be further reduced to the final map of {opcode-num -> opcode function}."
+  "Returns a map of {opcode -> candidate functions} by parsing all samples.
+  This map can be further reduced to the final map of {opcode -> function}."
   ([]
    (let [candidates (find-sample-candidates)
-         op-codes (range (count opcodes))]
+         op-codes (range (count opcode-fns))]
      (->> op-codes
           (map #(find-opcode-candidates % candidates))
-          (zipmap (range (count opcodes))))))
+          (zipmap (range (count opcode-fns))))))
   ([op-code candidates]
    (->> candidates
         (filter #(= op-code (first %)))

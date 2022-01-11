@@ -33,6 +33,23 @@
 
 (def memoized-find-erosion-level (memoize find-erosion-level))
 
+(defn find-location-type
+  "Returns the type of a location based on the given erosion level."
+  [erosion-level]
+  (case (mod erosion-level 3)
+    0 :rocky
+    1 :wet
+    2 :narrow))
+
+; --------------------------
+; problem 1
+
+;; risk level of a location
+(def region-type->risk-level
+  {:rocky 0
+   :wet 1
+   :narrow 2})
+
 (defn -main
   []
   (println (find-geologic-index [10 10])))

@@ -24,7 +24,7 @@
 (def columns (:columns parsed-input))
 
 (defn get-adjacent
-  "Returns the values of adjacent locations to [x y]."
+  "Returns the values of adjacent acres to the acre at location [x y]."
   [acres [x y]]
   (let [top-left (get-in acres [(dec x) (dec y)])
         top (get-in acres [(dec x) y])
@@ -38,7 +38,7 @@
             [top-left top top-right left right bottom-left bottom bottom-right])))
 
 (defn create-grid
-  "Returns a collection of all [x y] locations."
+  "Returns a collection of all acre locations [x y]."
   []
   (for [x (range rows)
         y (range columns)]
@@ -64,18 +64,39 @@
 
 (def grid (create-grid))
 
+(defn advance
+  "Returns the next state of all acres."
+  [acres]
+  (->> grid
+       (map #(next-state acres %))
+       (partition columns)
+       (mapv vec)))
+
+(defn get-acre-at-N
+  "Returns the acres at position N in the acres-seq assuming the
+  acres at position i and (i - 1)/2 are the same."
+  [acres-seq N i]
+  (let [diff (inc (/ (dec i) 2))
+        q (Math/round (Math/floor (/ (- N i) diff)))
+        fi (+ (/ (dec i) 2) (- N (+ i (* q diff))))]
+    (get acres-seq fi)))
+
 (defn simulate
-  "Runs the simulation for the given number of steps."
+  "Runs the simulation for the given number of steps and returns the
+  lumber area after the given number of steps.
+  Uses Floyd's cycle-finding algorithm."
   ([steps]
-   (simulate steps acres))
-  ([steps acres]
-   (if (zero? steps)
-     acres
-     (let [new-acres (->> grid
-                          (map #(next-state acres %))
-                          (partition columns)
-                          (mapv vec))]
-       (recur (dec steps) new-acres)))))
+   (simulate steps [acres] 1))
+  ([steps acres-seq i]
+   (let [curr-acres (last acres-seq)]
+     (if (= (inc steps) (count acres-seq))
+       curr-acres
+       (let [next-acres (advance curr-acres)
+             new-acres (conj acres-seq next-acres)
+             checked-acres (get new-acres (/ (dec i) 2))]
+         (if (and (odd? i) (= next-acres checked-acres))
+           (get-acre-at-N new-acres steps i)
+           (recur steps new-acres (inc i))))))))
 
 (defn day18
   [steps]
@@ -84,4 +105,5 @@
 
 (defn -main
   []
-  (println (day18 10)))
+  (println (day18 10))
+  (println (day18 1000000000)))

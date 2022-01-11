@@ -50,6 +50,20 @@
    :wet 1
    :narrow 2})
 
+; --------------------------
+; results
+
+(defn day22-1
+  []
+  (let [grid (for [i (range 0 (inc (first target-loc)))
+                   j (range 0 (inc (second target-loc)))]
+               [i j])]
+    (->> grid
+         (map #(memoized-find-erosion-level %))
+         (map find-location-type)
+         (map region-type->risk-level)
+         (apply +))))
+
 (defn -main
   []
-  (println (find-geologic-index [10 10])))
+  (println (day22-1)))

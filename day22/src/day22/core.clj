@@ -97,6 +97,17 @@
        (map location-type->risk-level)
        (apply +)))
 
+(defn day22-1-sol2
+  []
+  (->> (create-grid)
+       find-erosion-level2
+       first
+       (map second)
+       (map find-location-type)
+       (map location-type->risk-level)
+       (apply +)))
+
 (defn -main
   []
-  (println (time (day22-1-sol1))))
+  (println (time (day22-1-sol1)))
+  (println (time (day22-1-sol2))))

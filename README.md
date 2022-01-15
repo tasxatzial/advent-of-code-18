@@ -8,4 +8,7 @@ Unsolved problems:
 
 Todo:
 
-* Day 10
+* Day 10, 15, 17, 19-21, 24
+* Day 22 pt2
+* Day 23 pt2
+* Day 25 pt2

@@ -31,6 +31,30 @@
               (assoc result i distances)))
           {} (range (count points))))
 
+; --------------------------
+; problem 1
+
+(defn find-close-points
+  "Returns a collection of points (their indexes) that are close to point at given index."
+  [index distances-map]
+  (let [point-distances (get distances-map index)
+        distances (zipmap (range (count point-distances)) point-distances)]
+    (map first (filter #(<= (second %) 3) distances))))
+
+(defn constellation-points
+  "Returns a set of all points (their indexes) that belong to the same constellation
+  as the point at given index."
+  ([index distances-map]
+   (constellation-points [index] (set [index]) distances-map))
+  ([last-added points distances-map]
+   (let [close-points (->> last-added
+                           (map #(find-close-points % distances-map))
+                           flatten
+                           (remove points))]
+     (if (empty? close-points)
+       points
+       (recur close-points (into points close-points) distances-map)))))
+
 (defn -main
   []
-  (println (find-distances)))
+  (println (constellation-points 0 (find-distances))))

@@ -55,6 +55,28 @@
        points
        (recur close-points (into points close-points) distances-map)))))
 
+(defn find-constellations
+  "Returns a collection of all constellations, each is a set of the indexes of the
+  points that belong to the constellation."
+  ([]
+   (let [distances (find-distances)]
+     (find-constellations distances [])))
+  ([distances result]
+   (if (empty? distances)
+     result
+     (let [[index _] (first distances)
+           constellations (constellation-points index distances)
+           new-constellations (conj result constellations)
+           new-distances (reduce #(dissoc %1 %2) distances constellations)]
+       (recur new-distances new-constellations)))))
+
+; --------------------------
+; results
+
+(defn day25-1
+  []
+  (count (find-constellations)))
+
 (defn -main
   []
-  (println (constellation-points 0 (find-distances))))
+  (println (day25-1)))

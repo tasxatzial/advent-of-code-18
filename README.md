@@ -1,14 +1,14 @@
-# Advent of code 2018
+# Advent of code solutions (2018)
 
-My solutions for [advent of code 2018](https://adventofcode.com/2018). Work in progress.
+[Advent of Code](https://adventofcode.com) is an annual set of Christmas-themed computer programming challenges that follow an Advent calendar. It has been running since 2015.
 
-Unsolved problems:
+The programming puzzles cover a variety of skill sets and skill levels and can be solved using any programming language. Participants also compete based on speed on both global and private leaderboards.
 
-* Day 9 pt2
+---
 
-Todo:
+This repo contains my solutions to the problems for the year 2018.
 
-* Day 10, 15, 17, 19-21, 24
-* Day 22 pt2
-* Day 23 pt2
-* Day 25 pt2
+## Implemented algorithms
+
+* Day 16: [Backtracking](https://en.wikipedia.org/wiki/Backtracking)
+* Day 25: [Breadth-first search](https://en.wikipedia.org/wiki/Breadth-first_search)

@@ -8,82 +8,85 @@
 (def input-file "resources\\input.txt")
 
 (defn parse-line
-  "Parses a string representing a single claim."
+  "Parses an input line into a vector of 5 numbers."
   [line]
-  (let [no-delims (clojure.string/split line #" @ |,|: |x")]
-    (mapv #(Integer/parseInt %) (rest no-delims))))
+  (->> line
+       (re-seq #"\d+|\d+,\d+|\d+x\d+")
+       (mapv #(Integer/parseInt %))))
 
-(defn parse
-  "Splits the input string by \n and converts it to an appropriate data
-  structure."
-  [s]
-  (mapv parse-line (clojure.string/split-lines s)))
-
-(def claims (parse (slurp input-file)))
-
-; --------------------------
-; problem 1
-
-(defn find-max-coordinate
-  "Finds the max claimed coordinate."
+(defn parse-file
+  "Reads and parses the input file into a vector of claims.
+  Each claim is represented by a vector of 5 numbers
+  (id, left offset, top offset, width, height)."
   []
-  (reduce (fn [[max-x max-y] [left top width height]]
-            [(max max-x (+ left width))
-             (max max-y (+ top height))])
-          [0 0] claims))
+  (->> input-file
+       slurp
+       clojure.string/split-lines
+       (mapv parse-line)))
 
-(defn find-claimed
-  "Returns a list of all claimed coordinates of a claim."
-  [[left top width height :as claim]]
+(def memoized-input-file->claims (memoize parse-file))
+
+(defn find-contained-squares
+  "Returns a list of all squares contained in the given rectangle."
+  [[left top width height]]
   (for [x (range left (+ left width))
         y (range top (+ top height))]
     [x y]))
 
-(defn claimed?
-  "Returns true if [x y] is a claimed coordinate."
-  [[x y] [left top width height :as claim]]
-  (and (<= left x (+ left width))
-       (<= top y (+ top height))))
-
-(defn find-multiple-claimed
-  "Returns a vector of two set. The first set are the claimed coordinates which
-  are claimed at least twice. The second set are the claimed coordinates which
-  are claimed only one time."
+(defn find-claimed-squares-frequency
+  "Returns a map of the frequency count of all claimed squares."
   []
-  (reduce (fn [[multiple-claimed not-claimed] claim]
-            (let [claimed (set (find-claimed claim))
-                  already-claimed (set/intersection multiple-claimed claimed)
-                  new-claimed (set/intersection not-claimed claimed)
-                  new-not-claimed (set/difference claimed already-claimed new-claimed)
-                  old-not-claimed (set/difference not-claimed already-claimed new-claimed)
-                  updated-multiple-claimed (into multiple-claimed new-claimed)
-                  updated-not-claimed (into old-not-claimed new-not-claimed)]
-              [updated-multiple-claimed updated-not-claimed]))
-          [#{} #{}] claims))
+  (let [rectangles (map rest (memoized-input-file->claims))]
+    (frequencies (reduce (fn [result rectangle]
+                           (into result (find-contained-squares rectangle)))
+                         []
+                         rectangles))))
 
-(def memoized-find-multiple-claimed (memoize find-multiple-claimed))
+(def memoized-claimed-squares-frequency (memoize find-claimed-squares-frequency))
+
+; --------------------------
+; problem 1
+
+(defn count-twice-claimed-squares
+  "Returns the number of squares that have been claimed at least twice."
+  []
+  (->> (memoized-claimed-squares-frequency)
+       vals
+       (filter #(> % 1))
+       count))
 
 ; --------------------------
 ; problem 2
 
-(defn find-non-overlapping-claim
-  "Find the claim id that does not overlap with any other claim."
+(defn find-once-claimed-squares
+  "Returns a vector of the squares that have been claimed only once."
   []
-  (let [single-claimed (second (memoized-find-multiple-claimed))]
-    (loop [[claim & rest-claims] claims
-           index 0]
-      (if claim
-        (let [claimed (set (find-claimed claim))]
-          (if (empty? (set/difference claimed single-claimed))
-            (inc index)
-            (recur rest-claims (inc index))))))))
+  (let [claimed-squares-frequencies (memoized-claimed-squares-frequency)]
+    (reduce (fn [result [square freq]]
+              (if (= freq 1)
+                (conj result square)
+                result))
+            []
+            claimed-squares-frequencies)))
+
+(defn find-non-overlapping-claim
+  "Find the id of the claim that does not overlap with any other claim."
+  []
+  (let [once-claimed-squares (set (find-once-claimed-squares))
+        claims (memoized-input-file->claims)]
+    (loop [[[id & rectangle] & rest-claims] claims]
+      (when id
+        (let [contained-squares (set (find-contained-squares rectangle))]
+          (if (empty? (set/difference contained-squares once-claimed-squares))
+            id
+            (recur rest-claims)))))))
 
 ; --------------------------
 ; results
 
 (defn day03-1
   []
-  (count (first (memoized-find-multiple-claimed))))
+  (count-twice-claimed-squares))
 
 (defn day03-2
   []

@@ -6,59 +6,64 @@
 
 (def input-file "resources\\input.txt")
 
-(def polymer (butlast (slurp input-file)))
+(def memoized-input-file->polymer (fn [] (butlast (slurp input-file))))
 
 ; --------------------------
 ; problem 1
 
 (defn react?
-  "Returns true if two letters can react, false otherwise."
+  "Returns true if two units can react, false otherwise."
   [l1 l2]
   (= 32 (Math/abs (- (int l1) (int l2)))))
 
-(defn react-polymer
-  "Return the polymer sequence after all possible reactions."
+(defn find-fully-reacted-polymer
+  "Returns the polymer after all possible reactions."
   [polymer]
   (reverse (reduce (fn [result letter]
-            (if (and (seq result) (react? letter (first result)))
-              (rest result)
-              (conj result letter)))
-          (list (first polymer)) (rest polymer))))
+                     (if (and (seq result) (react? letter (first result)))
+                       (rest result)
+                       (conj result letter)))
+                   (list (first polymer))
+                   (rest polymer))))
 
 ; --------------------------
 ; problem 2
 
 (defn reverse-case
-  "Transforms a lowercase char to its uppercase equivalent and vice versa."
+  "Transforms a lowercase unit to uppercase and vice versa."
   [letter]
   (if (>= (int letter) (int \a))
     (char (- (int letter) 32))
     (char (+ (int letter) 32))))
 
-(defn remove-unit
-  "Removes the given unit (regardless of polarity) from the polymer sequence."
-  [unit]
-  (remove #{unit (reverse-case unit)} polymer))
-
-(defn find-min-polymer-length
-  "For every unit, the unit (regardless of polarity) is removed form the polymer
-  and the polymer fully reacts. Returns the minimum polymer length."
+(defn generate-all-units
+  "Returns a seq of all lowercase units."
   []
-  (->> (map char (range (int \a) (inc (int \z))))
-       (map #(react-polymer (remove-unit %)))
-       (map count)
-       (apply min)))
+  (map char (range (int \a) (inc (int \z)))))
+
+(defn find-fully-reacted-polymer-after-unit-removal
+  "Removes the given unit from the polymer (case-insensitive), and returns
+  the polymer after all possible reactions."
+  [unit]
+  (let [polymer (memoized-input-file->polymer)
+        polymer-without-unit (remove #{unit (reverse-case unit)} polymer)]
+    (find-fully-reacted-polymer polymer-without-unit)))
 
 ; --------------------------
 ; results
 
 (defn day05-1
   []
-  (count (react-polymer polymer)))
+  (-> (memoized-input-file->polymer)
+      find-fully-reacted-polymer
+      count))
 
 (defn day05-2
   []
-  (find-min-polymer-length))
+  (->> (generate-all-units)
+       (map find-fully-reacted-polymer-after-unit-removal)
+       (map count)
+       (apply min)))
 
 (defn -main
   []

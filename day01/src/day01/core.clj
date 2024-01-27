@@ -6,39 +6,42 @@
 
 (def input-file "resources\\input.txt")
 
-(defn parse
-  "Splits the input string by \n and converts it into a vector of numbers."
-  [s]
-  (->> s
+(defn get-frequency-changes
+  "Reads and parses the input file into a vector of frequencies."
+  []
+  (->> input-file
+       slurp
        clojure.string/split-lines
        (mapv #(Integer/parseInt %))))
 
-(def frequency-changes (parse (slurp input-file)))
+(def memoized-get-frequency-changes (memoize get-frequency-changes))
 
 ; --------------------------
 ; problem 2
 
-(defn first-repeated-freq
+(defn get-first-repeated-freq
   "Finds the first frequency that is repeated twice."
-  ([] (first-repeated-freq #{0} 0 frequency-changes))
-  ([frequencies curr-frequency [frequency-change & rest-changes]]
-   (if frequency-change
-     (let [new-frequency (+ curr-frequency frequency-change)]
-       (if (contains? frequencies new-frequency)
-         new-frequency
-         (recur (conj frequencies new-frequency) new-frequency rest-changes)))
-     (recur frequencies curr-frequency frequency-changes))))
+  []
+  (loop [[change & rest-changes] (memoized-get-frequency-changes)
+         sums #{}
+         curr-sum 0]
+    (if change
+      (let [new-sum (+ change curr-sum)]
+        (if (contains? sums new-sum)
+          new-sum
+          (recur rest-changes (conj sums new-sum) new-sum)))
+      (recur (memoized-get-frequency-changes) sums curr-sum))))
 
 ; ---------------------------------------
 ; results
 
 (defn day01-1
   []
-  (apply + frequency-changes))
+  (reduce + (memoized-get-frequency-changes)))
 
 (defn day01-2
   []
-  (first-repeated-freq))
+  (get-first-repeated-freq))
 
 (defn -main
   []

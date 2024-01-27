@@ -6,14 +6,14 @@
 
 (def input-file "resources\\input.txt")
 
-(defn get-ids
+(defn parse-file
   "Reads and parses the input file into a vector of strings."
   []
   (->> input-file
        slurp
        clojure.string/split-lines))
 
-(def memoized-get-ids (memoize get-ids))
+(def memoized-input-file->ids (memoize parse-file))
 
 ; --------------------------
 ; problem 1
@@ -30,7 +30,7 @@
   "Finds the number of ids that have a letter that
   appears exactly freq-count times."
   [freq-count]
-  (->> (memoized-get-ids)
+  (->> (memoized-input-file->ids)
        (map #(find-letters freq-count %))
        (filter seq)
        count))
@@ -67,7 +67,7 @@
   "Returns the string formed by the chars which are common at the
   same positions in the two correct ids."
   []
-  (loop [[id & rest-ids] (memoized-get-ids)]
+  (loop [[id & rest-ids] (memoized-input-file->ids)]
     (when id
       (or (find-common-str-between-correct-ids1 id rest-ids)
            (recur rest-ids)))))

@@ -6,66 +6,71 @@
 
 (def input-file "resources\\input.txt")
 
-(defn parse
-  "Splits the input string by \n and converts it into a vector of strings."
-  [s]
-  (clojure.string/split-lines s))
+(defn get-ids
+  "Reads and parses the input file into a vector of strings."
+  []
+  (->> input-file
+       slurp
+       clojure.string/split-lines))
 
-(def box-ids (parse (slurp input-file)))
+(def memoized-get-ids (memoize get-ids))
 
 ; --------------------------
 ; problem 1
 
 (defn find-letters
-  "Finds the letters in the given box-id that appear exactly freq times."
-  [freq box-id]
-  (->> box-id
+  "Finds the letters in the given id that appear exactly freq-count times."
+  [freq-count id]
+  (->> id
        frequencies
-       (filter #(= freq (second %)))
+       (filter #(= freq-count (second %)))
        (map first)))
 
-(defn count-freq
-  "Counts the box-ids in the collection that have a letter that
-  appears exactly freq times."
-  [freq]
-  (count (filter seq (map #(find-letters freq %) box-ids))))
+(defn count-ids
+  "Finds the number of ids that have a letter that
+  appears exactly freq-count times."
+  [freq-count]
+  (->> (memoized-get-ids)
+       (map #(find-letters freq-count %))
+       (filter seq)
+       count))
 
 (defn calc-checksum
-  "Calculates the required checksum."
+  "Calculates the checksum."
   []
-  (let [count-exactly-2times (count-freq 2)
-        count-exactly-3times (count-freq 3)]
-    (* count-exactly-2times count-exactly-3times)))
+  (* (count-ids 2) (count-ids 3)))
 
 ; --------------------------
 ; problem 2
 
-(defn compare-ids
-  "Returns a list containing true and false, each item indicates
-  whether id1 and id2 are equal in the corresponding position."
+(defn differ-by-one?
+  "Returns true if the given ids differ by exactly one character
+  at the same position, else false."
   [id1 id2]
-  (map = id1 id2))
+  (= 1 (count (filter false? (map = id1 id2)))))
 
-(defn find-single-difference
-  "If there is an item in all-ids which differs from id by exactly
-  one character, it returns a list of their positional differences
-  as returned by function compare-ids. That list should have exactly
-  one false item. Returns nil if such item does not exist."
-  [id all-ids]
-  (let [id-comparisons (map #(compare-ids id %) all-ids)]
-    (some #(and (= 1 (count (filter false? %))) %)
-          id-comparisons)))
+(defn find-common-str
+  "Returns the string formed by the chars which are common
+  at the same positions in both ids."
+  [id1 id2]
+  (apply str (remove false? (map #(and (= %1 %2) %1) id1 id2))))
 
-(defn find-single-difference-id
-  "Finds the id that differs by exactly one character from an
-  id in the box-ids and returns of vector of the id and the positional
-  difference list as returned by compare-ids."
-  []
-  (loop [[id & rest-ids] box-ids]
-    (if id
-      (if-let [res (find-single-difference id rest-ids)]
-        [id res]
+(defn- find-common-str-between-correct-ids1
+  [id1 ids]
+  (loop [[id2 & rest-ids] ids]
+    (when id2
+      (if (differ-by-one? id1 id2)
+        (find-common-str id1 id2)
         (recur rest-ids)))))
+
+(defn find-common-str-between-correct-ids
+  "Returns the string formed by the chars which are common at the
+  same positions in the two correct ids."
+  []
+  (loop [[id & rest-ids] (memoized-get-ids)]
+    (when id
+      (or (find-common-str-between-correct-ids1 id rest-ids)
+           (recur rest-ids)))))
 
 ; ---------------------------------------
 ; results
@@ -76,11 +81,7 @@
 
 (defn day02-2
   []
-  (let [[id diff] (find-single-difference-id)]
-    (->> (map vector id diff)
-         (filter #(true? (second %)))
-         (map first)
-         (apply str))))
+  (find-common-str-between-correct-ids))
 
 (defn -main
   []
